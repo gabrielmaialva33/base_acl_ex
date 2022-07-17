@@ -1,4 +1,4 @@
-defmodule BaseAclExWeb.UserController do
+defmodule BaseAclExWeb.Controllers.UserController do
   use BaseAclExWeb, :controller
 
   alias BaseAclEx.Account.Repositories.UserRepository
