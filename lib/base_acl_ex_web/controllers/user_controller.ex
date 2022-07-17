@@ -1,7 +1,7 @@
 defmodule BaseAclExWeb.Controllers.UserController do
   use BaseAclExWeb, :controller
 
-  alias BaseAclEx.Account.Repositories.UserRepository
+  alias BaseAclEx.Accounts.Repositories.UserRepository
   alias BaseAclEx.Accounts.Models.User
 
   action_fallback BaseAclExWeb.FallbackController

@@ -1,4 +1,4 @@
-defmodule BaseAclEx.Account.Repositories.UserRepository do
+defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   @moduledoc """
   The User context repository.
   """

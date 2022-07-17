@@ -18,7 +18,7 @@ defmodule BaseAclEx.AccountsFixtures do
         password_hash: "some password_hash",
         username: "some username"
       })
-      |> BaseAclEx.Accounts.create_user()
+      |> BaseAclEx.Accounts.Repositories.UserRepository.create_user()
 
     user
   end
