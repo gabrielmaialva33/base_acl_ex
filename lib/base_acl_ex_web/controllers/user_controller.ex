@@ -4,6 +4,7 @@ defmodule BaseAclExWeb.Controllers.UserController do
   alias BaseAclEx.Accounts.Repositories.UserRepository
   alias BaseAclEx.Accounts.Models.User
 
+  plug :put_view, BaseAclExWeb.Views.UserView
   action_fallback BaseAclExWeb.FallbackController
 
   def index(conn, _params) do

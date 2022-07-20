@@ -1,6 +1,6 @@
-defmodule BaseAclExWeb.UserView do
+defmodule BaseAclExWeb.Views.UserView do
   use BaseAclExWeb, :view
-  alias BaseAclExWeb.UserView
+  alias BaseAclExWeb.Views.UserView
 
   def render("index.json", %{users: users}) do
     %{data: render_many(users, UserView, "user.json")}
@@ -13,12 +13,11 @@ defmodule BaseAclExWeb.UserView do
   def render("user.json", %{user: user}) do
     %{
       id: user.id,
+      fullname: "#{user.firstname} #{user.lastname}",
       firstname: user.firstname,
       lastname: user.lastname,
       username: user.username,
-      email: user.email,
-      password_hash: user.password_hash,
-      is_deleted: user.is_deleted
+      email: user.email
     }
   end
 end
