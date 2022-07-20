@@ -1,3 +1,4 @@
+@moduledoc "User Management"
 defmodule BaseAclEx.Accounts.Models.User do
   use Ecto.Schema
   import Ecto.Changeset

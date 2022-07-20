@@ -1,3 +1,4 @@
+@moduledoc "Role Management"
 defmodule BaseAclEx.Accounts.Models.Role do
   use Ecto.Schema
   import Ecto.Changeset
