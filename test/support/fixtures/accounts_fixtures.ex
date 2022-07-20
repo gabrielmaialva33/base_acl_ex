@@ -22,4 +22,20 @@ defmodule BaseAclEx.AccountsFixtures do
 
     user
   end
+
+  @doc """
+  Generate a role.
+  """
+  def role_fixture(attrs \\ %{}) do
+    {:ok, role} =
+      attrs
+      |> Enum.into(%{
+        description: "some description",
+        name: "some name",
+        slug: "some slug"
+      })
+      |> BaseAclEx.Accounts.create_role()
+
+    role
+  end
 end

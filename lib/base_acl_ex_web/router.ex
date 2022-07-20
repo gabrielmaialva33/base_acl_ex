@@ -1,7 +1,7 @@
 defmodule BaseAclExWeb.Router do
   use BaseAclExWeb, :router
 
-  alias Controllers.{UserController}
+  alias Controllers.{UserController, RoleController}
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -11,6 +11,7 @@ defmodule BaseAclExWeb.Router do
     pipe_through :api
 
     resources "/users", UserController
+    resources "/roles", RoleController
   end
 
   # Enables LiveDashboard only for development
