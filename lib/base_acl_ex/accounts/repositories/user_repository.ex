@@ -7,6 +7,7 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   alias BaseAclEx.Repo
 
   alias BaseAclEx.Accounts.Models.User
+  alias BaseAclEx.Accounts.Repositories.{RoleRepository}
 
   @doc """
   Returns the list of users.
@@ -18,7 +19,8 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
 
   """
   def list_users do
-    Repo.all(User)
+    query = from u in User, where: u.is_deleted != true, order_by: u.firstname, preload: [:roles]
+    Repo.all(query)
   end
 
   @doc """
@@ -37,6 +39,13 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user(id) do
+    query =
+      from u in User, where: u.id == ^id and u.is_deleted != true, preload: [:roles], limit: 1
+
+    Repo.one(query)
+  end
+
   @doc """
   Creates a user.
 
@@ -52,6 +61,7 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   def create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:roles, [RoleRepository.get_role_by_name("user")])
     |> Repo.insert()
   end
 

@@ -1,4 +1,3 @@
-@moduledoc "Telemetry Service"
 defmodule BaseAclExWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics

@@ -1,14 +1,18 @@
-@moduledoc "User Management"
 defmodule BaseAclEx.Accounts.Models.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias BaseAclEx.Accounts.Models.{Role, User, UserRole}
+
+  # global fields
   @required_fields ~w(firstname lastname email username password)a
   @optional_fields ~w(is_online is_blocked is_deleted)a
   # @sortable_fields ~w(firstname lastname email username)a
 
+  # user schema
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @type t :: %User{}
   schema "users" do
     field :firstname, :string
     field :lastname, :string
@@ -21,6 +25,16 @@ defmodule BaseAclEx.Accounts.Models.User do
     field :is_online, :boolean, default: false
     field :is_blocked, :boolean, default: false
     field :is_deleted, :boolean, default: false
+
+    # set relationships
+    many_to_many :roles,
+                 Role,
+                 join_through: UserRole,
+                 join_keys: [
+                   user_id: :id,
+                   role_id: :id
+                 ],
+                 on_replace: :mark_as_invalid
 
     timestamps()
   end

@@ -38,6 +38,13 @@ defmodule BaseAclEx.Accounts.Repositories.RoleRepository do
   def get_role!(id), do: Repo.get!(Role, id)
 
   @doc """
+  Gets a single role by name.
+  """
+  def get_role_by_name(name) do
+    Repo.get_by(Role, name: name)
+  end
+
+  @doc """
   Creates a role.
 
   ## Examples

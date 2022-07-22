@@ -3,7 +3,7 @@ defmodule BaseAclEx.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users, primary_key: false) do
-      add(:id, :binary_id, primary_key: true)
+      add(:id, :uuid, primary_key: true, null: false, default: fragment("uuid_generate_v4()"))
 
       add(:firstname, :string, size: 80, null: false)
       add(:lastname, :string, size: 80, null: false)

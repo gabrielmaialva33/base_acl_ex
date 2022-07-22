@@ -8,7 +8,14 @@ defmodule BaseAclEx.AccountsTest do
 
     import BaseAclEx.AccountsFixtures
 
-    @invalid_attrs %{email: nil, firstname: nil, is_deleted: nil, lastname: nil, password_hash: nil, username: nil}
+    @invalid_attrs %{
+      email: nil,
+      firstname: nil,
+      is_deleted: nil,
+      lastname: nil,
+      password_hash: nil,
+      username: nil
+    }
 
     test "list_users/0 returns all users" do
       user = user_fixture()
@@ -21,7 +28,14 @@ defmodule BaseAclEx.AccountsTest do
     end
 
     test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{email: "some email", firstname: "some firstname", is_deleted: true, lastname: "some lastname", password_hash: "some password_hash", username: "some username"}
+      valid_attrs = %{
+        email: "some email",
+        firstname: "some firstname",
+        is_deleted: true,
+        lastname: "some lastname",
+        password_hash: "some password_hash",
+        username: "some username"
+      }
 
       assert {:ok, %User{} = user} = Accounts.create_user(valid_attrs)
       assert user.email == "some email"
@@ -38,7 +52,15 @@ defmodule BaseAclEx.AccountsTest do
 
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
-      update_attrs = %{email: "some updated email", firstname: "some updated firstname", is_deleted: false, lastname: "some updated lastname", password_hash: "some updated password_hash", username: "some updated username"}
+
+      update_attrs = %{
+        email: "some updated email",
+        firstname: "some updated firstname",
+        is_deleted: false,
+        lastname: "some updated lastname",
+        password_hash: "some updated password_hash",
+        username: "some updated username"
+      }
 
       assert {:ok, %User{} = user} = Accounts.update_user(user, update_attrs)
       assert user.email == "some updated email"
@@ -99,7 +121,12 @@ defmodule BaseAclEx.AccountsTest do
 
     test "update_role/2 with valid data updates the role" do
       role = role_fixture()
-      update_attrs = %{description: "some updated description", name: "some updated name", slug: "some updated slug"}
+
+      update_attrs = %{
+        description: "some updated description",
+        name: "some updated name",
+        slug: "some updated slug"
+      }
 
       assert {:ok, %Role{} = role} = Accounts.update_role(role, update_attrs)
       assert role.description == "some updated description"

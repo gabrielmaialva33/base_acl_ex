@@ -21,7 +21,14 @@ defmodule BaseAclExWeb.UserControllerTest do
     password_hash: "some updated password_hash",
     username: "some updated username"
   }
-  @invalid_attrs %{email: nil, firstname: nil, is_deleted: nil, lastname: nil, password_hash: nil, username: nil}
+  @invalid_attrs %{
+    email: nil,
+    firstname: nil,
+    is_deleted: nil,
+    lastname: nil,
+    password_hash: nil,
+    username: nil
+  }
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}

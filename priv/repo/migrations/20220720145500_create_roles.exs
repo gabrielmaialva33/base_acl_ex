@@ -3,7 +3,7 @@ defmodule BaseAclEx.Repo.Migrations.CreateRoles do
 
   def change do
     create table(:roles, primary_key: false) do
-      add(:id, :binary_id, primary_key: true)
+      add(:id, :uuid, primary_key: true, null: false, default: fragment("uuid_generate_v4()"))
 
       add(:slug, :string, size: 20, null: false)
       add(:name, :string, size: 20, null: false)

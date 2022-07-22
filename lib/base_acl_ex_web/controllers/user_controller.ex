@@ -22,12 +22,12 @@ defmodule BaseAclExWeb.Controllers.UserController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = UserRepository.get_user!(id)
+    user = UserRepository.get_user(id)
     render(conn, "show.json", user: user)
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = UserRepository.get_user!(id)
+    user = UserRepository.get_user(id)
 
     with {:ok, %User{} = user} <- UserRepository.update_user(user, user_params) do
       render(conn, "show.json", user: user)
