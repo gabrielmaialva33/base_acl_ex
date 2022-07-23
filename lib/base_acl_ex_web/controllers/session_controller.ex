@@ -4,13 +4,15 @@ defmodule BaseAclExWeb.Controllers.SessionController do
   plug :put_view, BaseAclExWeb.Views.SessionView
   action_fallback BaseAclExWeb.FallbackController
 
+  alias BaseAclExWeb.Helpers
   alias BaseAclEx.Accounts.Repositories.UserRepository
 
   @permitted_params ~w(uid password)s
 
   # %{"session" => %{ "uid" => email,"password" => password}}
   def sign_in(conn, params) do
-    {uid, password} = params |> Map.take(@permitted_params)
+    %{uid: uid, password: password} =
+      params |> Map.take(@permitted_params) |> Helpers.keys_to_atoms()
 
     case UserRepository.confirm_password(uid, password) do
       {:ok, user} ->
