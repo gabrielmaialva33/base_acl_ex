@@ -22,7 +22,11 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   @spec list_users(Flop.t()) ::
           {:ok, {[User.t()], Flop.Meta.t()}} | {:error, Changeset.t()}
   def list_users(flop \\ %Flop{}) do
-    query = from u in User, where: u.is_deleted != true, preload: [:roles]
+    query =
+      from u in User,
+        where: u.is_deleted != true,
+        order_by: [u.first_name, u.last_name, u.username, u.email],
+        preload: [:roles]
 
     Flop.validate_and_run(query, flop, for: User)
   end
@@ -47,7 +51,7 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
     query =
       from u in User, where: u.id == ^id and u.is_deleted != true, preload: [:roles], limit: 1
 
-    Repo.one(query)
+    Repo.one!(query)
   end
 
   @doc """
