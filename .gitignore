@@ -26,3 +26,4 @@ base_acl_ex-*.tar
 .DS_Store
 .idea
 .vscode
+.elixir_ls
