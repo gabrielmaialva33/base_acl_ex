@@ -5,6 +5,7 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
 
   import Ecto.Query, warn: false
   alias BaseAclEx.Repo
+  alias Flop
 
   alias BaseAclEx.Accounts.Models.User
   alias BaseAclEx.Accounts.Repositories.{RoleRepository}
@@ -18,9 +19,12 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
       [%User{}, ...]
 
   """
-  def list_users do
-    query = from u in User, where: u.is_deleted != true, order_by: u.firstname, preload: [:roles]
-    Repo.all(query)
+  @spec list_users(Flop.t()) ::
+          {:ok, {[User.t()], Flop.Meta.t()}} | {:error, Changeset.t()}
+  def list_users(flop \\ %Flop{}) do
+    query = from u in User, where: u.is_deleted != true, preload: [:roles]
+
+    Flop.validate_and_run(query, flop, for: User)
   end
 
   @doc """

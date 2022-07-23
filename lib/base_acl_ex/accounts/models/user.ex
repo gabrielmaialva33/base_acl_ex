@@ -5,17 +5,31 @@ defmodule BaseAclEx.Accounts.Models.User do
   alias BaseAclEx.Accounts.Models.{Role, User, UserRole}
 
   # global fields
-  @required_fields ~w(firstname lastname email username password)a
+  @required_fields ~w(first_name last_name email username password)a
   @optional_fields ~w(is_online is_blocked is_deleted)a
-  # @sortable_fields ~w(firstname lastname email username)a
+  @sortable_fields ~w(first_name last_name email username)a
+
+  # flop config schema
+  @derive {
+    Flop.Schema,
+    filterable: @sortable_fields ++ [:search],
+    sortable: @sortable_fields ++ [:search],
+    default_limit: 10,
+    max_limit: 100,
+    default_order: %{
+      order_by: @sortable_fields,
+      order_directions: [:asc]
+    },
+    compound_fields: [search: @sortable_fields]
+  }
 
   # user schema
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   @type t :: %User{}
   schema "users" do
-    field :firstname, :string
-    field :lastname, :string
+    field :first_name, :string
+    field :last_name, :string
     field :email, :string
     field :username, :string
 
@@ -49,8 +63,8 @@ defmodule BaseAclEx.Accounts.Models.User do
 
   defp validate_changeset(user) do
     user
-    |> validate_length(:firstname, min: 2, max: 80)
-    |> validate_length(:lastname, min: 2, max: 80)
+    |> validate_length(:first_name, min: 2, max: 80)
+    |> validate_length(:last_name, min: 2, max: 80)
     |> validate_length(:username, min: 2, max: 50)
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 6)

@@ -1,15 +1,27 @@
 defmodule BaseAclExWeb.Controllers.UserController do
   use BaseAclExWeb, :controller
 
+  alias Flop
   alias BaseAclEx.Accounts.Repositories.UserRepository
   alias BaseAclEx.Accounts.Models.User
+  alias BaseAclExWeb.Helpers
 
   plug :put_view, BaseAclExWeb.Views.UserView
   action_fallback BaseAclExWeb.FallbackController
 
-  def index(conn, _params) do
-    users = UserRepository.list_users()
-    render(conn, "index.json", users: users)
+  @permitted_params ~w(page page_size search)s
+
+  def index(conn, params) do
+    map =
+      params
+      |> Map.take(@permitted_params)
+      |> Helpers.keys_to_atoms()
+      |> Map.put(:filters, [%{field: :search, op: :=~, value: Map.get(params, "search", "")}])
+
+    with {:ok, flop} <- Flop.validate(map, for: User) do
+      {:ok, {users, meta}} = UserRepository.list_users(flop)
+      render(conn, "index.json", %{users: users, meta: meta})
+    end
   end
 
   def create(conn, %{"user" => user_params}) do
