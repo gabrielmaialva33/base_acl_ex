@@ -7,11 +7,18 @@ defmodule BaseAclExWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :authenticated do
+    plug BaseAclExWeb.Plugs.AuthAccessPipeline
+  end
+
   scope "/api", BaseAclExWeb do
     pipe_through :api
 
     post "/sign_in", SessionController, :sign_in
     post "/sign_up", RegistrationController, :sign_up
+
+    # restrict unauthenticated access for routes below
+    pipe_through [:authenticated]
 
     resources "/users", UserController
     resources "/roles", RoleController

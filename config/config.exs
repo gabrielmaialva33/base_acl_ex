@@ -40,7 +40,10 @@ config :phoenix, :json_library, Jason
 
 config :base_acl_ex, BaseAclEx.Guardian,
   issuer: "base_acl_ex",
-  secret_key: "fRK+MLCXJyIiSYv3y7bVk5YZxUO5WDexwuu2uhKjyVbn5NcZZBXhNlKFC2qPVhpW"
+  ttl: {30, :days},
+  allowed_drift: 2000,
+  secret_key: "fRK+MLCXJyIiSYv3y7bVk5YZxUO5WDexwuu2uhKjyVbn5NcZZBXhNlKFC2qPVhpW",
+  serializer: BaseAclExWeb.Views.TokenView
 
 # Use Flop for pagination in Phoenix
 config :flop, repo: BaseAclEx.Repo
