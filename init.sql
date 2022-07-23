@@ -1,5 +1,5 @@
-CREATE DATABASE base_acl_api_dev;
-CREATE DATABASE base_acl_api_test;
+CREATE DATABASE base_acl_ex_dev;
+CREATE DATABASE base_acl_ex_test;
 
-GRANT ALL PRIVILEGES ON DATABASE base_acl_api_dev TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE base_acl_api_test TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE base_acl_ex_dev TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE base_acl_ex_test TO postgres;

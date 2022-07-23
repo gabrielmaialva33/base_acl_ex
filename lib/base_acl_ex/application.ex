@@ -20,6 +20,11 @@ defmodule BaseAclEx.Application do
       # {BaseAclEx.Worker, arg}
     ]
 
+    unless Mix.env == :prod do
+      Dotenv.load
+      Mix.Task.run("loadconfig")
+    end
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: BaseAclEx.Supervisor]

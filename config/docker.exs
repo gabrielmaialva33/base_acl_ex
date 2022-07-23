@@ -2,10 +2,10 @@ import Config
 
 # Configure your database
 config :base_acl_ex, BaseAclEx.Repo,
-  hostname: System.get_env("PG_HOST") || "localhost",
-  username: System.get_env("PG_USER") || "postgres",
-  password: System.get_env("PG_USER") || "postgres",
-  database: System.get_env("PG_DB_NAME") || "postgres",
+  username: "postgres",
+  password: "postgres",
+  hostname: "postgres",
+  database: "base_acl_ex_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -22,7 +22,7 @@ config :base_acl_ex, BaseAclExWeb.Endpoint,
   http: [ip: {0, 0, 0, 0}, port: 4000],
   check_origin: false,
   code_reloader: true,
-  debug_errors: true,
+  debug_errors: false,
   secret_key_base: "wQMtCkMbnTFBq0xCP8WTj5qMAH78JhdyX7fBDCbHak5Fh6Kw5imT0PsvHTynrOxw",
   watchers: []
 

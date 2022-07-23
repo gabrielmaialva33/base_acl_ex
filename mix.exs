@@ -48,6 +48,7 @@ defmodule BaseAclEx.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:guardian, "~> 2.2.4"},
       {:flop, "~> 0.16.1"},
+      {:dotenv, "~> 3.1.0", only: [:docker, :dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end
