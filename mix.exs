@@ -46,6 +46,7 @@ defmodule BaseAclEx.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ecto_psql_extras, "~> 0.7"},
       {:argon2_elixir, "~> 3.0"},
+      {:guardian, "~> 2.2.4"},
       {:flop, "~> 0.16.1"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]

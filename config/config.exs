@@ -38,6 +38,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :base_acl_ex, BaseAclEx.Guardian,
+  issuer: "base_acl_ex",
+  secret_key: "fRK+MLCXJyIiSYv3y7bVk5YZxUO5WDexwuu2uhKjyVbn5NcZZBXhNlKFC2qPVhpW"
+
 # Use Flop for pagination in Phoenix
 config :flop, repo: BaseAclEx.Repo
 

@@ -1,7 +1,7 @@
 defmodule BaseAclExWeb.Router do
   use BaseAclExWeb, :router
 
-  alias Controllers.{UserController, RoleController}
+  alias Controllers.{UserController, RoleController,SessionController }
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -9,6 +9,8 @@ defmodule BaseAclExWeb.Router do
 
   scope "/api", BaseAclExWeb do
     pipe_through :api
+
+    post "/sign_in", SessionController, :sign_in
 
     resources "/users", UserController
     resources "/roles", RoleController

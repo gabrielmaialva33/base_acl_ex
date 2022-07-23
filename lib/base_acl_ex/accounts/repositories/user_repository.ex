@@ -122,4 +122,26 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
+
+  @doc """
+  Get user and confirm password.
+  """
+  def confirm_password(uid, password) do
+    query =
+      from u in User,
+        where: u.is_deleted != true and (u.email == ^uid or u.username == ^uid),
+        limit: 1
+
+    case Repo.one(query) do
+      nil ->
+        {:error, :not_found}
+
+      user ->
+        if Argon2.check_pass(password, user.password_hash) do
+          {:ok, user}
+        else
+          {:error, :unauthorized}
+        end
+    end
+  end
 end
