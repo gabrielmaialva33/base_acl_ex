@@ -10,6 +10,13 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   alias BaseAclEx.Accounts.Models.User
   alias BaseAclEx.Accounts.Repositories.{RoleRepository}
 
+  @behaviour Bodyguard.Policy
+
+  # Admins can update anything
+  def authorize([:index, :show], %{roles: roles} = _user) do
+    IO.inspect(roles)
+  end
+
   @doc """
   Returns the list of users.
 

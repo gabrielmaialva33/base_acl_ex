@@ -27,3 +27,4 @@ base_acl_ex-*.tar
 .idea
 .vscode
 .elixir_ls
+.env

@@ -8,6 +8,8 @@ defmodule BaseAclEx.Accounts.Repositories.RoleRepository do
 
   alias BaseAclEx.Accounts.Models.Role
 
+  @behaviour Bodyguard.Policy
+
   @doc """
   Returns the list of roles.
 

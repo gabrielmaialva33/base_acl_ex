@@ -20,8 +20,8 @@ defmodule BaseAclEx.Application do
       # {BaseAclEx.Worker, arg}
     ]
 
-    unless Mix.env == :prod do
-      Dotenv.load
+    unless Mix.env() == :prod do
+      Dotenv.load()
       Mix.Task.run("loadconfig")
     end
 
