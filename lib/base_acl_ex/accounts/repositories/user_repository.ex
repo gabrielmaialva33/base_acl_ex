@@ -47,6 +47,9 @@ defmodule BaseAclEx.Accounts.Repositories.UserRepository do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @doc """
+  Gets a single user.
+  """
   def get_user(id) do
     query =
       from u in User, where: u.id == ^id and u.is_deleted != true, preload: [:roles], limit: 1
