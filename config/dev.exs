@@ -4,7 +4,7 @@ import Config
 config :base_acl_ex, BaseAclEx.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: "192.168.0.100",
   database: "base_acl_ex_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,

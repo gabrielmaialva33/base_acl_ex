@@ -2,9 +2,9 @@ defmodule BaseAclExWeb.Controllers.UserController do
   use BaseAclExWeb, :controller
 
   alias Flop
-  alias BaseAclEx.Accounts.Repositories.UserRepository
-  alias BaseAclEx.Accounts.Models.User
   alias BaseAclExWeb.Helpers
+  alias BaseAclEx.Accounts.Models.User
+  alias BaseAclEx.Accounts.Repositories.UserRepository
 
   plug :put_view, BaseAclExWeb.Views.UserView
   action_fallback BaseAclExWeb.FallbackController
