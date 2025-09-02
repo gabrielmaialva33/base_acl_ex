@@ -4,8 +4,10 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Email do
   email-related operations.
   """
   
-  use BaseAclEx.SharedKernel.ValueObject
+  use Ecto.Schema
+  import Ecto.Changeset
   
+  @primary_key false
   embedded_schema do
     field :value, :string
     field :normalized, :string
