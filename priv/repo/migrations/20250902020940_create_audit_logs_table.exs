@@ -23,10 +23,9 @@ defmodule BaseAclEx.Repo.Migrations.CreateAuditLogsTable do
       add :http_status, :integer
       add :context, :map, default: %{}
       
-      inserted_at(:utc_datetime, null: false)
+      # Only inserted_at for audit logs (immutable records)
+      timestamps(updated_at: false, type: :utc_datetime)
     end
-
-    # No updated_at for audit logs (immutable)
     
     # Performance indexes
     create index(:audit_logs, [:user_id])
