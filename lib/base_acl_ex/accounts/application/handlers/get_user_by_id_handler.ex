@@ -8,6 +8,7 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserByIdHandler do
   alias BaseAclEx.Accounts.Application.Queries.GetUserByIdQuery
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclExWeb.Formatters.UserFormatter
 
   @impl true
   def execute(%GetUserByIdQuery{} = query) do
