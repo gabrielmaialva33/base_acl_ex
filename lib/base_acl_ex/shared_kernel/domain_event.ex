@@ -1,7 +1,7 @@
 defmodule BaseAclEx.SharedKernel.DomainEvent do
   @moduledoc """
   Base behaviour for domain events.
-  
+
   Domain events represent something that happened in the domain that
   other parts of the system might be interested in.
   """
@@ -29,7 +29,8 @@ defmodule BaseAclEx.SharedKernel.DomainEvent do
         :occurred_at,
         :metadata,
         :payload,
-        event_type: __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom(),
+        event_type:
+          __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom(),
         event_version: "1.0.0"
       ]
 
@@ -40,7 +41,8 @@ defmodule BaseAclEx.SharedKernel.DomainEvent do
       def occurred_at, do: DateTime.utc_now()
 
       @impl true
-      def event_type, do: __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
+      def event_type,
+        do: __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
 
       @impl true
       def event_version, do: "1.0.0"

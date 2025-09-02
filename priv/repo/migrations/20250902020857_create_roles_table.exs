@@ -16,24 +16,24 @@ defmodule BaseAclEx.Repo.Migrations.CreateRolesTable do
       add :icon, :string
       add :max_users, :integer
       add :features, {:array, :string}, default: []
-      
+
       timestamps(type: :utc_datetime)
     end
 
     # Unique constraints
     create unique_index(:roles, [:slug], name: :roles_slug_unique)
     create unique_index(:roles, [:name], name: :roles_name_unique)
-    
+
     # Performance indexes
     create index(:roles, [:is_active])
     create index(:roles, [:is_system])
     create index(:roles, [:hierarchy_level])
     create index(:roles, [:parent_role_id])
-    
+
     # Composite indexes for common queries
     create index(:roles, [:is_active, :hierarchy_level])
     create index(:roles, [:parent_role_id, :hierarchy_level])
-    
+
     # Check constraint for hierarchy level
     create constraint(:roles, :hierarchy_level_positive, check: "hierarchy_level >= 0")
   end

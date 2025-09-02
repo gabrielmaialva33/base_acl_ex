@@ -18,14 +18,15 @@ defmodule BaseAclEx.Repo.Migrations.CreatePermissionsTable do
       add :metadata, :map, default: %{}
       add :conditions, :map, default: %{}
       add :dependencies, {:array, :string}, default: []
-      
+
       timestamps(type: :utc_datetime)
     end
 
     # Unique constraint on permission combination
-    create unique_index(:permissions, [:resource, :action, :context], 
-                       name: :permissions_resource_action_context_unique)
-    
+    create unique_index(:permissions, [:resource, :action, :context],
+             name: :permissions_resource_action_context_unique
+           )
+
     # Performance indexes
     create index(:permissions, [:name])
     create index(:permissions, [:resource])
@@ -35,29 +36,32 @@ defmodule BaseAclEx.Repo.Migrations.CreatePermissionsTable do
     create index(:permissions, [:is_active])
     create index(:permissions, [:is_system])
     create index(:permissions, [:risk_level])
-    
+
     # Composite indexes for common queries
     create index(:permissions, [:resource, :action])
     create index(:permissions, [:resource, :context])
     create index(:permissions, [:is_active, :resource])
     create index(:permissions, [:category, :is_active])
-    
+
     # Full-text search index
     execute """
-    CREATE INDEX permissions_search_idx ON permissions 
-    USING gin(to_tsvector('english', 
-      coalesce(name, '') || ' ' || 
-      coalesce(resource, '') || ' ' || 
-      coalesce(action, '') || ' ' || 
-      coalesce(description, '')))
-    """, "DROP INDEX permissions_search_idx"
-    
+            CREATE INDEX permissions_search_idx ON permissions 
+            USING gin(to_tsvector('english', 
+              coalesce(name, '') || ' ' || 
+              coalesce(resource, '') || ' ' || 
+              coalesce(action, '') || ' ' || 
+              coalesce(description, '')))
+            """,
+            "DROP INDEX permissions_search_idx"
+
     # Check constraint for risk level
-    create constraint(:permissions, :valid_risk_level, 
-                     check: "risk_level IN ('low', 'medium', 'high', 'critical')")
-    
+    create constraint(:permissions, :valid_risk_level,
+             check: "risk_level IN ('low', 'medium', 'high', 'critical')"
+           )
+
     # Check constraint for context
-    create constraint(:permissions, :valid_context, 
-                     check: "context IN ('any', 'own', 'team', 'department', 'organization')")
+    create constraint(:permissions, :valid_context,
+             check: "context IN ('any', 'own', 'team', 'department', 'organization')"
+           )
   end
 end

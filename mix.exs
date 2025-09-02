@@ -66,16 +66,16 @@ defmodule BaseAclEx.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      
+
       # Authentication & Security
       {:argon2_elixir, "~> 4.0"},
       {:guardian, "~> 2.3"},
       {:bodyguard, "~> 2.4"},
-      
+
       # Caching
       {:cachex, "~> 4.0"},
       {:nebulex, "~> 2.6"},
-      
+
       # Development & Testing
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_machina, "~> 2.8", only: :test},

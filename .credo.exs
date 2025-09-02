@@ -30,14 +30,14 @@
           {Credo.Check.Consistency.SpaceAroundOperators, []},
           {Credo.Check.Consistency.SpaceInParentheses, []},
           {Credo.Check.Consistency.TabsOrSpaces, []},
-          
+
           # Design Checks
           {Credo.Check.Design.AliasUsage,
            [priority: :low, if_nested_deeper_than: 2, if_called_more_often_than: 2]},
           {Credo.Check.Design.TagFIXME, []},
           {Credo.Check.Design.TagTODO, [exit_status: 2]},
           {Credo.Check.Design.DuplicatedCode, [mass_threshold: 40]},
-          
+
           # Readability Checks
           {Credo.Check.Readability.AliasOrder, []},
           {Credo.Check.Readability.FunctionNames, []},
@@ -60,7 +60,7 @@
           {Credo.Check.Readability.UnnecessaryAliasExpansion, []},
           {Credo.Check.Readability.VariableNames, []},
           {Credo.Check.Readability.WithSingleClause, []},
-          
+
           # Refactoring Opportunities
           {Credo.Check.Refactor.Apply, []},
           {Credo.Check.Refactor.CondStatements, []},
@@ -78,7 +78,7 @@
           {Credo.Check.Refactor.FilterFilter, []},
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Refactor.RejectFilter, []},
-          
+
           # Warnings
           {Credo.Check.Warning.ApplicationConfigInModuleAttribute, []},
           {Credo.Check.Warning.BoolOperationOnSameValues, []},

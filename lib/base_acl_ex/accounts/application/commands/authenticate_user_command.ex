@@ -2,9 +2,9 @@ defmodule BaseAclEx.Accounts.Application.Commands.AuthenticateUserCommand do
   @moduledoc """
   Command to authenticate a user and generate JWT tokens.
   """
-  
+
   use BaseAclEx.SharedKernel.CQRS.Command
-  
+
   @enforce_keys [:email, :password]
   defstruct [
     :email,
@@ -13,7 +13,7 @@ defmodule BaseAclEx.Accounts.Application.Commands.AuthenticateUserCommand do
     :user_agent,
     :remember_me
   ]
-  
+
   @doc """
   Creates a new authenticate user command.
   """
@@ -26,30 +26,32 @@ defmodule BaseAclEx.Accounts.Application.Commands.AuthenticateUserCommand do
       remember_me: attrs[:remember_me] || false
     }
   end
-  
+
   @impl true
   def validate(command) do
     errors = []
-    
-    errors = if is_nil(command.email) || command.email == "" do
-      [{:email, "is required"} | errors]
-    else
-      errors
-    end
-    
-    errors = if is_nil(command.password) || command.password == "" do
-      [{:password, "is required"} | errors]
-    else
-      errors
-    end
-    
+
+    errors =
+      if is_nil(command.email) || command.email == "" do
+        [{:email, "is required"} | errors]
+      else
+        errors
+      end
+
+    errors =
+      if is_nil(command.password) || command.password == "" do
+        [{:password, "is required"} | errors]
+      else
+        errors
+      end
+
     if Enum.empty?(errors) do
       {:ok, command}
     else
       {:error, errors}
     end
   end
-  
+
   @impl true
   def metadata(command) do
     %{

@@ -27,23 +27,31 @@ defmodule BaseAclEx.Repo.Migrations.CreateUsersTable do
     end
 
     # Unique indexes
-    create unique_index(:users, [:email], where: "is_deleted = false", name: :users_email_unique_active)
-    create unique_index(:users, [:username], where: "username IS NOT NULL AND is_deleted = false", name: :users_username_unique_active)
-    
+    create unique_index(:users, [:email],
+             where: "is_deleted = false",
+             name: :users_email_unique_active
+           )
+
+    create unique_index(:users, [:username],
+             where: "username IS NOT NULL AND is_deleted = false",
+             name: :users_username_unique_active
+           )
+
     # Performance indexes
     create index(:users, [:is_active, :is_deleted])
     create index(:users, [:email_verified_at])
     create index(:users, [:last_login_at])
     create index(:users, [:locked_until], where: "locked_until IS NOT NULL")
-    
+
     # Full-text search index for user search
     execute """
-    CREATE INDEX users_search_idx ON users 
-    USING gin(to_tsvector('english', coalesce(email, '') || ' ' || 
-                                     coalesce(username, '') || ' ' || 
-                                     coalesce(first_name, '') || ' ' || 
-                                     coalesce(last_name, '')))
-    WHERE is_deleted = false
-    """, "DROP INDEX users_search_idx"
+            CREATE INDEX users_search_idx ON users 
+            USING gin(to_tsvector('english', coalesce(email, '') || ' ' || 
+                                             coalesce(username, '') || ' ' || 
+                                             coalesce(first_name, '') || ' ' || 
+                                             coalesce(last_name, '')))
+            WHERE is_deleted = false
+            """,
+            "DROP INDEX users_search_idx"
   end
 end
