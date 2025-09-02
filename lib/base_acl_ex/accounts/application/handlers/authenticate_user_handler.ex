@@ -87,7 +87,7 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
     :ok
   end
 
-  defp load_user_permissions(user) do
+  defp load_user_permissions(_user) do
     # Load permissions from database
     # This would typically join through user_roles and role_permissions
     []
@@ -137,6 +137,8 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
     parse_device_from_agent(user_agent)
   end
 
+  defp parse_device_name(_), do: "Unknown Device"
+
   defp parse_device_from_agent(user_agent) do
     device_mappings = [
       {"Mobile", "Mobile Device"},
@@ -156,6 +158,4 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
       nil -> "Unknown Device"
     end
   end
-
-  defp parse_device_name(_), do: "Unknown Device"
 end
