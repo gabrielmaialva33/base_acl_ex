@@ -25,7 +25,9 @@ defmodule BaseAclEx.Identity.Core.ValueObjects.Resource do
   @doc """
   Creates a new Resource value object.
   """
-  def new(name, category \\ nil) when is_binary(name) do
+  def new(name, category \\ nil)
+
+  def new(name, category) when is_binary(name) do
     normalized = normalize(name)
 
     if valid?(normalized) do

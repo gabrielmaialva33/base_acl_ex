@@ -5,7 +5,6 @@ defmodule BaseAclEx.Identity.Core.Aggregates.PermissionAggregate do
   """
 
   use Ecto.Schema
-  alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Identity.Core.Entities.{Permission, Role}
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -57,9 +56,6 @@ defmodule BaseAclEx.Identity.Core.Aggregates.PermissionAggregate do
   Removes a role from a user.
   """
   def revoke_role(%__MODULE__{} = aggregate, role_id, opts \\ []) do
-    revoked_by = Keyword.get(opts, :revoked_by)
-    reason = Keyword.get(opts, :reason)
-
     if role_assigned?(aggregate, role_id) do
       event = create_role_revoked_event(aggregate.user_id, role_id, opts)
 

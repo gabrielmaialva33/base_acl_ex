@@ -19,7 +19,9 @@ defmodule BaseAclEx.Identity.Core.ValueObjects.Scope do
   @doc """
   Creates a new Scope value object.
   """
-  def new(type, scope_id \\ nil, metadata \\ %{}) when is_binary(type) do
+  def new(type, scope_id \\ nil, metadata \\ %{})
+
+  def new(type, scope_id, metadata) when is_binary(type) do
     normalized = normalize(type)
 
     if valid?(normalized) do
