@@ -138,31 +138,33 @@ defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterManager do
   def export_data(format \\ :json) do
     case list_active_limits(limit: :infinity) do
       [] ->
-        case format do
-          :json -> "{\"limits\": []}"
-          :csv -> "identifier,current_requests,max_requests,remaining,exceeded\n"
-        end
+        export_empty(format)
 
       limits ->
-        case format do
-          :json ->
-            Jason.encode!(%{
-              exported_at: DateTime.utc_now(),
-              limits: limits,
-              stats: get_system_stats()
-            })
-
-          :csv ->
-            headers = "identifier,current_requests,max_requests,remaining,exceeded\n"
-
-            rows =
-              Enum.map(limits, fn limit ->
-                "#{limit.identifier},#{limit.current_requests},#{limit.max_requests},#{limit.remaining},#{limit.exceeded}"
-              end)
-
-            headers <> Enum.join(rows, "\n")
-        end
+        export_with_data(limits, format)
     end
+  end
+
+  defp export_empty(:json), do: "{\"limits\": []}"
+  defp export_empty(:csv), do: "identifier,current_requests,max_requests,remaining,exceeded\n"
+
+  defp export_with_data(limits, :json) do
+    Jason.encode!(%{
+      exported_at: DateTime.utc_now(),
+      limits: limits,
+      stats: get_system_stats()
+    })
+  end
+
+  defp export_with_data(limits, :csv) do
+    headers = "identifier,current_requests,max_requests,remaining,exceeded\n"
+
+    rows =
+      Enum.map(limits, fn limit ->
+        "#{limit.identifier},#{limit.current_requests},#{limit.max_requests},#{limit.remaining},#{limit.exceeded}"
+      end)
+
+    headers <> Enum.join(rows, "\n")
   end
 
   # Private functions

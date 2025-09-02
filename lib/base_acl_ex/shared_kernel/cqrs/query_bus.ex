@@ -134,37 +134,47 @@ defmodule BaseAclEx.SharedKernel.CQRS.QueryBus do
     end
   end
 
-  defp execute_with_cache(handler_module, query, state) do
+  defp execute_with_cache(handler_module, query, _state) do
     cache_config = get_cache_config(query)
 
     if cache_config[:enabled] do
-      cache_key = generate_cache_key(query)
-
-      case Cachex.get(:query_cache, cache_key) do
-        {:ok, nil} ->
-          # Cache miss
-          GenServer.cast(self(), {:update_cache_miss, 1})
-
-          result = handler_module.execute(query)
-
-          if match?({:ok, _}, result) do
-            ttl = cache_config[:ttl] || :timer.minutes(5)
-            Cachex.put(:query_cache, cache_key, result, ttl: ttl)
-          end
-
-          result
-
-        {:ok, cached_result} ->
-          # Cache hit
-          GenServer.cast(self(), {:update_cache_hit, 1})
-          cached_result
-
-        _ ->
-          handler_module.execute(query)
-      end
+      execute_with_cache_enabled(handler_module, query, cache_config)
     else
       handler_module.execute(query)
     end
+  end
+
+  defp execute_with_cache_enabled(handler_module, query, cache_config) do
+    cache_key = generate_cache_key(query)
+
+    case Cachex.get(:query_cache, cache_key) do
+      {:ok, nil} ->
+        handle_cache_miss(handler_module, query, cache_key, cache_config)
+
+      {:ok, cached_result} ->
+        handle_cache_hit(cached_result)
+
+      _ ->
+        handler_module.execute(query)
+    end
+  end
+
+  defp handle_cache_miss(handler_module, query, cache_key, cache_config) do
+    GenServer.cast(self(), {:update_cache_miss, 1})
+
+    result = handler_module.execute(query)
+
+    if match?({:ok, _}, result) do
+      ttl = cache_config[:ttl] || :timer.minutes(5)
+      Cachex.put(:query_cache, cache_key, result, ttl: ttl)
+    end
+
+    result
+  end
+
+  defp handle_cache_hit(cached_result) do
+    GenServer.cast(self(), {:update_cache_hit, 1})
+    cached_result
   end
 
   @impl true

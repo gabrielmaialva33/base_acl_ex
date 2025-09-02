@@ -9,7 +9,9 @@ defmodule BaseAclExWeb.Telemetry do
   @impl true
   def init(_arg) do
     # Attach rate limiter telemetry handlers
-    BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry.attach_handlers()
+    alias BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry
+
+    RateLimiterTelemetry.attach_handlers()
 
     children = [
       # Telemetry poller will execute the given period measurements

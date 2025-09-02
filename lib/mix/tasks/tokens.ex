@@ -186,26 +186,31 @@ defmodule Mix.Tasks.Tokens do
     if Enum.empty?(threats) do
       Mix.shell().info("  No threats detected.")
     else
-      Enum.each(threats, fn threat ->
-        severity_color =
-          case threat.severity do
-            :low -> :green
-            :medium -> :yellow
-            :high -> :red
-            :critical -> [:red, :bright]
-          end
+      Enum.each(threats, &show_threat/1)
+    end
+  end
 
-        Mix.shell().info([
-          severity_color,
-          "  [#{String.upcase(to_string(threat.severity))}] #{threat.description}"
-        ])
+  defp show_threat(threat) do
+    severity_color = get_severity_color(threat.severity)
 
-        if threat.details do
-          Mix.shell().info("    Details: #{inspect(threat.details)}")
-        end
+    Mix.shell().info([
+      severity_color,
+      "  [#{String.upcase(to_string(threat.severity))}] #{threat.description}"
+    ])
 
-        Mix.shell().info("    Detected: #{threat.detected_at}")
-      end)
+    if threat.details do
+      Mix.shell().info("    Details: #{inspect(threat.details)}")
+    end
+
+    Mix.shell().info("    Detected: #{threat.detected_at}")
+  end
+
+  defp get_severity_color(severity) do
+    case severity do
+      :low -> :green
+      :medium -> :yellow
+      :high -> :red
+      :critical -> [:red, :bright]
     end
   end
 end

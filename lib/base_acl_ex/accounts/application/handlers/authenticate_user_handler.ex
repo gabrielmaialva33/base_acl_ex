@@ -134,16 +134,26 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
   end
 
   defp parse_device_name(user_agent) when is_binary(user_agent) do
-    cond do
-      String.contains?(user_agent, "Mobile") -> "Mobile Device"
-      String.contains?(user_agent, "iPhone") -> "iPhone"
-      String.contains?(user_agent, "Android") -> "Android Device"
-      String.contains?(user_agent, "iPad") -> "iPad"
-      String.contains?(user_agent, "Chrome") -> "Chrome Browser"
-      String.contains?(user_agent, "Firefox") -> "Firefox Browser"
-      String.contains?(user_agent, "Safari") -> "Safari Browser"
-      String.contains?(user_agent, "Edge") -> "Edge Browser"
-      true -> "Unknown Device"
+    parse_device_from_agent(user_agent)
+  end
+
+  defp parse_device_from_agent(user_agent) do
+    device_mappings = [
+      {"Mobile", "Mobile Device"},
+      {"iPhone", "iPhone"},
+      {"Android", "Android Device"},
+      {"iPad", "iPad"},
+      {"Chrome", "Chrome Browser"},
+      {"Firefox", "Firefox Browser"},
+      {"Safari", "Safari Browser"},
+      {"Edge", "Edge Browser"}
+    ]
+
+    device_mappings
+    |> Enum.find(fn {pattern, _} -> String.contains?(user_agent, pattern) end)
+    |> case do
+      {_, device_name} -> device_name
+      nil -> "Unknown Device"
     end
   end
 

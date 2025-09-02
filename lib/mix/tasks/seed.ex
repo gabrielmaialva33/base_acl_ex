@@ -518,33 +518,37 @@ defmodule Mix.Tasks.Seed do
     Logger.info("  Creating #{count} permissions...")
 
     {created, existing} =
-      Enum.reduce(permissions, {0, 0}, fn permission_attrs, {created_count, existing_count} ->
-        name =
-          "#{permission_attrs.resource}.#{permission_attrs.action}.#{permission_attrs.context}"
-
-        case Repo.get_by(Permission, name: name) do
-          nil ->
-            case Permission.new(permission_attrs) do
-              %Ecto.Changeset{valid?: true} = changeset ->
-                Repo.insert!(changeset)
-                Logger.debug("    ✓ Created permission: #{name}")
-                {created_count + 1, existing_count}
-
-              %Ecto.Changeset{valid?: false} = changeset ->
-                Logger.error(
-                  "    ✗ Failed to create permission #{name}: #{inspect(changeset.errors)}"
-                )
-
-                {created_count, existing_count}
-            end
-
-          _existing ->
-            Logger.debug("    → Permission already exists: #{name}")
-            {created_count, existing_count + 1}
-        end
+      Enum.reduce(permissions, {0, 0}, fn permission_attrs, acc ->
+        create_or_skip_permission(permission_attrs, acc)
       end)
 
     Logger.info("📋 Permissions seeding completed: #{created} created, #{existing} existing")
+  end
+
+  defp create_or_skip_permission(permission_attrs, {created_count, existing_count}) do
+    name = "#{permission_attrs.resource}.#{permission_attrs.action}.#{permission_attrs.context}"
+
+    case Repo.get_by(Permission, name: name) do
+      nil ->
+        insert_permission(permission_attrs, name, created_count, existing_count)
+
+      _existing ->
+        Logger.debug("    → Permission already exists: #{name}")
+        {created_count, existing_count + 1}
+    end
+  end
+
+  defp insert_permission(permission_attrs, name, created_count, existing_count) do
+    case Permission.new(permission_attrs) do
+      %Ecto.Changeset{valid?: true} = changeset ->
+        Repo.insert!(changeset)
+        Logger.debug("    ✓ Created permission: #{name}")
+        {created_count + 1, existing_count}
+
+      %Ecto.Changeset{valid?: false} = changeset ->
+        Logger.error("    ✗ Failed to create permission #{name}: #{inspect(changeset.errors)}")
+        {created_count, existing_count}
+    end
   end
 
   defp seed_roles do
@@ -628,30 +632,38 @@ defmodule Mix.Tasks.Seed do
     Logger.info("  Creating #{count} roles...")
 
     {created, existing} =
-      Enum.reduce(roles, {0, 0}, fn role_attrs, {created_count, existing_count} ->
-        case Repo.get_by(Role, slug: role_attrs.slug) do
-          nil ->
-            case Role.new(role_attrs) do
-              %Ecto.Changeset{valid?: true} = changeset ->
-                Repo.insert!(changeset)
-                Logger.debug("    ✓ Created role: #{role_attrs.name}")
-                {created_count + 1, existing_count}
-
-              %Ecto.Changeset{valid?: false} = changeset ->
-                Logger.error(
-                  "    ✗ Failed to create role #{role_attrs.name}: #{inspect(changeset.errors)}"
-                )
-
-                {created_count, existing_count}
-            end
-
-          existing ->
-            Logger.debug("    → Role already exists: #{existing.name}")
-            {created_count, existing_count + 1}
-        end
+      Enum.reduce(roles, {0, 0}, fn role_attrs, acc ->
+        create_or_skip_role(role_attrs, acc)
       end)
 
     Logger.info("👥 Roles seeding completed: #{created} created, #{existing} existing")
+  end
+
+  defp create_or_skip_role(role_attrs, {created_count, existing_count}) do
+    case Repo.get_by(Role, slug: role_attrs.slug) do
+      nil ->
+        insert_role(role_attrs, created_count, existing_count)
+
+      existing ->
+        Logger.debug("    → Role already exists: #{existing.name}")
+        {created_count, existing_count + 1}
+    end
+  end
+
+  defp insert_role(role_attrs, created_count, existing_count) do
+    case Role.new(role_attrs) do
+      %Ecto.Changeset{valid?: true} = changeset ->
+        Repo.insert!(changeset)
+        Logger.debug("    ✓ Created role: #{role_attrs.name}")
+        {created_count + 1, existing_count}
+
+      %Ecto.Changeset{valid?: false} = changeset ->
+        Logger.error(
+          "    ✗ Failed to create role #{role_attrs.name}: #{inspect(changeset.errors)}"
+        )
+
+        {created_count, existing_count}
+    end
   end
 
   defp seed_role_permissions do
@@ -903,30 +915,38 @@ defmodule Mix.Tasks.Seed do
     Logger.info("  Creating #{count} users...")
 
     {created, existing} =
-      Enum.reduce(users, {0, 0}, fn user_attrs, {created_count, existing_count} ->
-        case Repo.get_by(User, email: user_attrs.email) do
-          nil ->
-            case User.new(user_attrs) do
-              %Ecto.Changeset{valid?: true} = changeset ->
-                Repo.insert!(changeset)
-                Logger.debug("    ✓ Created user: #{user_attrs.email}")
-                {created_count + 1, existing_count}
-
-              %Ecto.Changeset{valid?: false} = changeset ->
-                Logger.error(
-                  "    ✗ Failed to create user #{user_attrs.email}: #{inspect(changeset.errors)}"
-                )
-
-                {created_count, existing_count}
-            end
-
-          existing ->
-            Logger.debug("    → User already exists: #{existing.email}")
-            {created_count, existing_count + 1}
-        end
+      Enum.reduce(users, {0, 0}, fn user_attrs, acc ->
+        create_or_skip_user(user_attrs, acc)
       end)
 
     Logger.info("👤 Users seeding completed: #{created} created, #{existing} existing")
+  end
+
+  defp create_or_skip_user(user_attrs, {created_count, existing_count}) do
+    case Repo.get_by(User, email: user_attrs.email) do
+      nil ->
+        insert_user(user_attrs, created_count, existing_count)
+
+      existing ->
+        Logger.debug("    → User already exists: #{existing.email}")
+        {created_count, existing_count + 1}
+    end
+  end
+
+  defp insert_user(user_attrs, created_count, existing_count) do
+    case User.new(user_attrs) do
+      %Ecto.Changeset{valid?: true} = changeset ->
+        Repo.insert!(changeset)
+        Logger.debug("    ✓ Created user: #{user_attrs.email}")
+        {created_count + 1, existing_count}
+
+      %Ecto.Changeset{valid?: false} = changeset ->
+        Logger.error(
+          "    ✗ Failed to create user #{user_attrs.email}: #{inspect(changeset.errors)}"
+        )
+
+        {created_count, existing_count}
+    end
   end
 
   defp seed_user_roles do

@@ -62,9 +62,8 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Password do
   """
   def validate_strength(password) when is_binary(password) do
     with :ok <- validate_length(password),
-         :ok <- validate_complexity(password),
-         :ok <- validate_common_patterns(password) do
-      :ok
+         :ok <- validate_complexity(password) do
+      validate_common_patterns(password)
     end
   end
 
@@ -83,9 +82,8 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Password do
   defp validate_complexity(password) do
     with :ok <- check_uppercase(password),
          :ok <- check_lowercase(password),
-         :ok <- check_number(password),
-         :ok <- check_special_char(password) do
-      :ok
+         :ok <- check_number(password) do
+      check_special_char(password)
     end
   end
 

@@ -1,7 +1,6 @@
 defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterTest do
   use ExUnit.Case, async: false
 
-  alias BaseAclEx.Infrastructure.Security.Entities.RateLimit
   alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
 
   @cache_name :rate_limiter_cache
@@ -82,7 +81,9 @@ defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterTest do
       assert rate_limit.identifier == "test_ip"
 
       # Restart cache for other tests
-      BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache.start_link()
+      alias BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache
+
+      RateLimiterCache.start_link()
     end
   end
 

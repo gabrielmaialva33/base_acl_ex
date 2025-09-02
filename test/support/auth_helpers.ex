@@ -57,19 +57,27 @@ defmodule BaseAclEx.TestSupport.AuthHelpers do
   def extract_user_from_conn(conn) do
     case get_req_header(conn, "authorization") do
       ["Bearer " <> token] ->
-        case GuardianImpl.decode_and_verify(token) do
-          {:ok, claims} ->
-            case GuardianImpl.resource_from_claims(claims) do
-              {:ok, user} -> user
-              _ -> nil
-            end
-
-          _ ->
-            nil
-        end
+        extract_user_from_token(token)
 
       _ ->
         nil
+    end
+  end
+
+  defp extract_user_from_token(token) do
+    case GuardianImpl.decode_and_verify(token) do
+      {:ok, claims} ->
+        extract_user_from_claims(claims)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp extract_user_from_claims(claims) do
+    case GuardianImpl.resource_from_claims(claims) do
+      {:ok, user} -> user
+      _ -> nil
     end
   end
 
