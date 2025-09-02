@@ -8,6 +8,9 @@ defmodule BaseAclExWeb.Telemetry do
 
   @impl true
   def init(_arg) do
+    # Attach rate limiter telemetry handlers
+    BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry.attach_handlers()
+
     children = [
       # Telemetry poller will execute the given period measurements
       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
@@ -79,7 +82,29 @@ defmodule BaseAclExWeb.Telemetry do
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.total_run_queue_lengths.io"),
+
+      # Rate Limiter Metrics
+      counter("base_acl_ex.rate_limiter.requests.allowed.count",
+        tags: [:identifier, :endpoint],
+        description: "Number of requests allowed by rate limiter"
+      ),
+      counter("base_acl_ex.rate_limiter.requests.blocked.count",
+        tags: [:identifier, :endpoint],
+        description: "Number of requests blocked by rate limiter"
+      ),
+      summary("base_acl_ex.rate_limiter.requests.duration",
+        unit: {:native, :millisecond},
+        tags: [:endpoint],
+        description: "Time spent processing rate limit checks"
+      ),
+      last_value("base_acl_ex.rate_limiter.cache.size",
+        description: "Current number of entries in rate limiter cache"
+      ),
+      last_value("base_acl_ex.rate_limiter.cache.memory",
+        unit: :byte,
+        description: "Memory usage of rate limiter cache"
+      )
     ]
   end
 

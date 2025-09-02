@@ -121,6 +121,18 @@ if config_env() == :prod do
   # Configure logger level
   config :logger, level: String.to_existing_atom(System.get_env("LOG_LEVEL") || "info")
 
+  # Rate limiting configuration from environment variables
+  config :base_acl_ex,
+    rate_limiting_enabled:
+      System.get_env("RATE_LIMITING_ENABLED", "true") |> String.to_existing_atom(),
+    rate_limiting_log_enabled:
+      System.get_env("RATE_LIMITING_LOG_ENABLED", "true") |> String.to_existing_atom(),
+    rate_limiter_cache: [
+      limit: String.to_integer(System.get_env("RATE_LIMITER_CACHE_LIMIT") || "500000"),
+      cleanup_interval:
+        String.to_integer(System.get_env("RATE_LIMITER_CLEANUP_INTERVAL") || "600000")
+    ]
+
   # ## Configuring the mailer
   #
   # Configure mailer based on available environment variables

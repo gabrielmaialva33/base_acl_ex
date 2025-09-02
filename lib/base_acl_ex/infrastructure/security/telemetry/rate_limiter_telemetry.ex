@@ -1,7 +1,7 @@
 defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   @moduledoc """
   Telemetry event handler for rate limiting system.
-  
+
   Provides monitoring, alerting, and metrics collection for rate limiting events.
   Integrates with existing telemetry infrastructure.
   """
@@ -10,7 +10,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
 
   @doc """
   Attaches telemetry handlers for rate limiting events.
-  
+
   Should be called during application startup to register all handlers.
   """
   def attach_handlers do
@@ -33,7 +33,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   """
   def handle_event([:base_acl_ex, :rate_limiter, :allowed], measurements, metadata, _config) do
     Logger.debug("Rate limit allowed", Map.merge(measurements, metadata))
-    
+
     # Increment allowed requests counter
     :telemetry.execute(
       [:base_acl_ex, :rate_limiter, :requests, :allowed],
@@ -44,21 +44,26 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
 
   def handle_event([:base_acl_ex, :rate_limiter, :blocked], measurements, metadata, _config) do
     Logger.warning("Rate limit blocked", Map.merge(measurements, metadata))
-    
+
     # Increment blocked requests counter
     :telemetry.execute(
       [:base_acl_ex, :rate_limiter, :requests, :blocked],
       %{count: 1},
       metadata
     )
-    
+
     # Check if this IP/user should trigger an alert
     maybe_trigger_alert(metadata)
   end
 
-  def handle_event([:base_acl_ex, :rate_limiter, :cache, :cleanup], measurements, metadata, _config) do
+  def handle_event(
+        [:base_acl_ex, :rate_limiter, :cache, :cleanup],
+        measurements,
+        metadata,
+        _config
+      ) do
     Logger.debug("Rate limiter cache cleanup", Map.merge(measurements, metadata))
-    
+
     # Track cache health metrics
     if measurements[:eviction_count] && measurements[:eviction_count] > 1000 do
       Logger.warning("High rate limiter cache evictions", measurements)
@@ -67,7 +72,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
 
   @doc """
   Gets rate limiting metrics for the current period.
-  
+
   Returns a map with:
   - total_allowed: Number of allowed requests
   - total_blocked: Number of blocked requests
@@ -89,29 +94,29 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
 
   @doc """
   Checks if rate limiting system is healthy.
-  
+
   Returns health status with any issues detected.
   """
   def health_check do
     cache_healthy = cache_health_check()
     block_rate = calculate_block_rate()
-    
+
     issues = []
-    
-    issues = 
+
+    issues =
       if not cache_healthy do
         ["Cache not responding" | issues]
       else
         issues
       end
-    
-    issues = 
+
+    issues =
       if block_rate > 0.5 do
         ["High block rate: #{Float.round(block_rate * 100, 1)}%" | issues]
       else
         issues
       end
-    
+
     case issues do
       [] ->
         %{
@@ -122,7 +127,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
             block_rate: block_rate
           }
         }
-        
+
       issues ->
         %{
           status: :degraded,
@@ -141,17 +146,17 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   defp maybe_trigger_alert(metadata) do
     identifier = metadata[:identifier]
     endpoint = metadata[:endpoint]
-    
+
     # Simple alert logic - could be enhanced with more sophisticated rules
     cond do
       String.contains?(identifier, "192.168.") ->
         # Internal IP being blocked - might indicate misconfiguration
         Logger.warning("Internal IP blocked by rate limiter", metadata)
-        
+
       endpoint && String.contains?(endpoint, "/auth/") ->
         # Auth endpoint being blocked - potential brute force
         Logger.warning("Authentication endpoint rate limited - possible attack", metadata)
-        
+
       true ->
         :ok
     end
@@ -183,7 +188,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
           size: Map.get(stats, :miss_count, 0) + Map.get(stats, :hit_count, 0),
           evictions: Map.get(stats, :eviction_count, 0)
         }
-        
+
       _ ->
         %{hit_rate: 0.0, size: 0, evictions: 0}
     end
@@ -193,7 +198,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
     hits = Map.get(stats, :hit_count, 0)
     misses = Map.get(stats, :miss_count, 0)
     total = hits + misses
-    
+
     if total > 0 do
       hits / total
     else
