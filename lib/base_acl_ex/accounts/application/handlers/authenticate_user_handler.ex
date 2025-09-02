@@ -6,12 +6,12 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
 
   use BaseAclEx.SharedKernel.CQRS.CommandHandler
 
+  alias BaseAclEx.Accounts.Application.Commands.AuthenticateUserCommand
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Accounts.Core.ValueObjects.Password
-  alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
-  alias BaseAclEx.Infrastructure.Persistence.Repo
   alias BaseAclEx.Identity.Application.Services.PermissionCache
-  alias BaseAclEx.Accounts.Application.Commands.AuthenticateUserCommand
+  alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
 
   @impl true
   def execute(%AuthenticateUserCommand{} = command) do

@@ -5,9 +5,9 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserByIdHandler do
 
   use BaseAclEx.SharedKernel.CQRS.QueryHandler
 
+  alias BaseAclEx.Accounts.Application.Queries.GetUserByIdQuery
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Persistence.Repo
-  alias BaseAclEx.Accounts.Application.Queries.GetUserByIdQuery
 
   @impl true
   def execute(%GetUserByIdQuery{} = query) do

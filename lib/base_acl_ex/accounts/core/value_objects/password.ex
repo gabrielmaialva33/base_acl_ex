@@ -81,31 +81,43 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Password do
   end
 
   defp validate_complexity(password) do
-    errors = []
+    with :ok <- check_uppercase(password),
+         :ok <- check_lowercase(password),
+         :ok <- check_number(password),
+         :ok <- check_special_char(password) do
+      :ok
+    end
+  end
 
-    errors =
-      if @require_uppercase && !String.match?(password, ~r/[A-Z]/),
-        do: [:missing_uppercase | errors],
-        else: errors
+  defp check_uppercase(password) do
+    if @require_uppercase && !String.match?(password, ~r/[A-Z]/) do
+      {:error, {:weak_password, [:missing_uppercase]}}
+    else
+      :ok
+    end
+  end
 
-    errors =
-      if @require_lowercase && !String.match?(password, ~r/[a-z]/),
-        do: [:missing_lowercase | errors],
-        else: errors
+  defp check_lowercase(password) do
+    if @require_lowercase && !String.match?(password, ~r/[a-z]/) do
+      {:error, {:weak_password, [:missing_lowercase]}}
+    else
+      :ok
+    end
+  end
 
-    errors =
-      if @require_number && !String.match?(password, ~r/[0-9]/),
-        do: [:missing_number | errors],
-        else: errors
+  defp check_number(password) do
+    if @require_number && !String.match?(password, ~r/[0-9]/) do
+      {:error, {:weak_password, [:missing_number]}}
+    else
+      :ok
+    end
+  end
 
-    errors =
-      if @require_special && !String.match?(password, @special_chars),
-        do: [:missing_special_char | errors],
-        else: errors
-
-    case errors do
-      [] -> :ok
-      _ -> {:error, {:weak_password, errors}}
+  defp check_special_char(password) do
+    if @require_special && !String.match?(password, @special_chars) do
+      {:error, {:weak_password, [:missing_special_char]}}
+    else
+      :ok
     end
   end
 

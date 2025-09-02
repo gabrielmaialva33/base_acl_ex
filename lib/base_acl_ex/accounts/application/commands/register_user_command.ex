@@ -36,51 +36,69 @@ defmodule BaseAclEx.Accounts.Application.Commands.RegisterUserCommand do
 
   @impl true
   def validate(command) do
-    errors = []
+    validators = [
+      &validate_email/1,
+      &validate_password/1,
+      &validate_first_name/1,
+      &validate_last_name/1,
+      &validate_terms/1
+    ]
 
     errors =
-      if is_nil(command.email) || command.email == "" do
-        [{:email, "is required"} | errors]
-      else
-        if valid_email?(command.email) do
-          errors
-        else
-          [{:email, "is invalid"} | errors]
-        end
-      end
-
-    errors =
-      if is_nil(command.password) || String.length(command.password) < 8 do
-        [{:password, "must be at least 8 characters"} | errors]
-      else
-        errors
-      end
-
-    errors =
-      if is_nil(command.first_name) || command.first_name == "" do
-        [{:first_name, "is required"} | errors]
-      else
-        errors
-      end
-
-    errors =
-      if is_nil(command.last_name) || command.last_name == "" do
-        [{:last_name, "is required"} | errors]
-      else
-        errors
-      end
-
-    errors =
-      if command.terms_accepted != true do
-        [{:terms_accepted, "must be accepted"} | errors]
-      else
-        errors
-      end
+      validators
+      |> Enum.map(fn validator -> validator.(command) end)
+      |> Enum.filter(fn result -> result != :ok end)
+      |> Enum.map(fn {:error, error} -> error end)
 
     if Enum.empty?(errors) do
       {:ok, command}
     else
       {:error, errors}
+    end
+  end
+
+  defp validate_email(command) do
+    cond do
+      is_nil(command.email) || command.email == "" ->
+        {:error, {:email, "is required"}}
+
+      !valid_email?(command.email) ->
+        {:error, {:email, "is invalid"}}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validate_password(command) do
+    if is_nil(command.password) || String.length(command.password) < 8 do
+      {:error, {:password, "must be at least 8 characters"}}
+    else
+      :ok
+    end
+  end
+
+  defp validate_first_name(command) do
+    if is_nil(command.first_name) || command.first_name == "" do
+      {:error, {:first_name, "is required"}}
+    else
+      :ok
+    end
+  end
+
+  defp validate_last_name(command) do
+    if is_nil(command.last_name) || command.last_name == "" do
+      {:error, {:last_name, "is required"}}
+    else
+      :ok
+    end
+  end
+
+  defp validate_terms(command) do
+    if command.terms_accepted != true do
+      {:error, {:terms_accepted, "must be accepted"}}
+    else
+      :ok
     end
   end
 

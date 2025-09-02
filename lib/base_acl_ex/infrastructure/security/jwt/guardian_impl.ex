@@ -7,8 +7,8 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
   use Guardian, otp_app: :base_acl_ex
 
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Infrastructure.Persistence.Repo
   alias BaseAclEx.Identity.Application.Services.PermissionCache
+  alias BaseAclEx.Infrastructure.Persistence.Repo
 
   @impl Guardian
   def subject_for_token(%User{id: user_id}, _claims) do

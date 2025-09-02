@@ -5,9 +5,9 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserPermissionsHandler do
 
   use BaseAclEx.SharedKernel.CQRS.QueryHandler
 
+  alias BaseAclEx.Accounts.Application.Queries.GetUserPermissionsQuery
   alias BaseAclEx.Identity.Application.Services.PermissionCache
   alias BaseAclEx.Identity.Core.Aggregates.PermissionAggregate
-  alias BaseAclEx.Accounts.Application.Queries.GetUserPermissionsQuery
 
   @impl true
   def execute(%GetUserPermissionsQuery{} = query) do

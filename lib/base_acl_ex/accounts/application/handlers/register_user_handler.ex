@@ -6,11 +6,11 @@ defmodule BaseAclEx.Accounts.Application.Handlers.RegisterUserHandler do
 
   use BaseAclEx.SharedKernel.CQRS.CommandHandler
 
+  alias BaseAclEx.Accounts.Application.Commands.RegisterUserCommand
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Accounts.Core.ValueObjects.{Email, Password}
   alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.Infrastructure.Persistence.Repo
-  alias BaseAclEx.Accounts.Application.Commands.RegisterUserCommand
 
   @impl true
   def execute(%RegisterUserCommand{} = command) do

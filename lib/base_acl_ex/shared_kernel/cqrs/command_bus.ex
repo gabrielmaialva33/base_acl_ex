@@ -131,13 +131,11 @@ defmodule BaseAclEx.SharedKernel.CQRS.CommandBus do
   end
 
   defp execute_handler(handler_module, command) do
-    try do
-      handler_module.execute(command)
-    rescue
-      e ->
-        Logger.error("Handler execution failed: #{inspect(e)}")
-        {:error, :handler_execution_failed}
-    end
+    handler_module.execute(command)
+  rescue
+    e ->
+      Logger.error("Handler execution failed: #{inspect(e)}")
+      {:error, :handler_execution_failed}
   end
 
   defp publish_domain_events(_command, result) do

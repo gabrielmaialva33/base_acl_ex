@@ -6,7 +6,7 @@ defmodule BaseAclEx.Identity.Core.Entities.Permission do
 
   use Ecto.Schema
   import Ecto.Changeset
-  alias BaseAclEx.Identity.Core.ValueObjects.{Resource, Action, Scope}
+  alias BaseAclEx.Identity.Core.ValueObjects.{Action, Resource, Scope}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id

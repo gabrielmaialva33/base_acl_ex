@@ -32,10 +32,10 @@ defmodule BaseAclEx.Accounts.Application.Queries.GetUserPermissionsQuery do
       end
 
     errors =
-      if query.scope not in ["any", "own", "team", "department", "organization", "global"] do
-        [{:scope, "is invalid"} | errors]
-      else
+      if query.scope in ["any", "own", "team", "department", "organization", "global"] do
         errors
+      else
+        [{:scope, "is invalid"} | errors]
       end
 
     if Enum.empty?(errors) do
