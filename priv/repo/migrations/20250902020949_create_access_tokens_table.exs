@@ -44,9 +44,9 @@ defmodule BaseAclEx.Repo.Migrations.CreateAccessTokensTable do
     create index(:access_tokens, [:token_type, :expires_at], where: "revoked_at IS NULL")
     create index(:access_tokens, [:user_id, :device_id], where: "revoked_at IS NULL")
     
-    # Partial index for active tokens
+    # Partial index for active tokens (without NOW() which is not immutable)
     create index(:access_tokens, [:user_id, :token_type], 
-                where: "revoked_at IS NULL AND expires_at > NOW()",
+                where: "revoked_at IS NULL",
                 name: :access_tokens_active_idx)
     
     # Check constraint for token type
