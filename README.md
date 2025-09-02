@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/gabrielmaialva33/base-acl-ex/master/.github/assets/logo.png" alt="BaseAclEx" width="200">
+  <img src="https://raw.githubusercontent.com/gabrielmaialva33/base-acl-ex/master/.github/assets/elixir.png" alt="BaseAclEx" width="200">
   <br>
   BaseAclEx 🔐
   <br>
