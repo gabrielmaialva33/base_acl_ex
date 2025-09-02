@@ -59,12 +59,15 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserByIdHandler do
 
     response =
       if query.include_permissions do
-        Map.put(response, :permissions, UserFormatter.format_permissions(Map.get(user, :permissions, [])))
+        Map.put(
+          response,
+          :permissions,
+          UserFormatter.format_permissions(Map.get(user, :permissions, []))
+        )
       else
         response
       end
 
     response
   end
-
 end
