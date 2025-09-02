@@ -7,7 +7,7 @@ defmodule BaseAclEx.TestSupport.AuthHelpers do
   import Phoenix.ConnTest
   import ExUnit.Assertions
   import Plug.Conn
-  
+
   alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
   alias BaseAclEx.Factory
 

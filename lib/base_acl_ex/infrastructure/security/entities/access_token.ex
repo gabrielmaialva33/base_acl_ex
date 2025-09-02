@@ -19,7 +19,8 @@ defmodule BaseAclEx.Infrastructure.Security.Entities.AccessToken do
     field :revoke_reason, :string
     field :last_used_at, :utc_datetime
     field :used_count, :integer, default: 0
-    field :ip_address, :string  # Using string for IP storage (compatible with INET)
+    # Using string for IP storage (compatible with INET)
+    field :ip_address, :string
     field :user_agent, :string
     field :device_id, :string
     field :device_name, :string
