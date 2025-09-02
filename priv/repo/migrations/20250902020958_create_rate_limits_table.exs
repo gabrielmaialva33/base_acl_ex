@@ -38,9 +38,9 @@ defmodule BaseAclEx.Repo.Migrations.CreateRateLimitsTable do
     create index(:rate_limits, [:bucket_type, :bucket_id, :action])
     create index(:rate_limits, [:window_end, :current_count])
     
-    # Partial index for active blocks
+    # Partial index for blocks (without NOW() which is not immutable)
     create index(:rate_limits, [:bucket_id, :blocked_until], 
-                where: "blocked_until > NOW()",
+                where: "blocked_until IS NOT NULL",
                 name: :rate_limits_active_blocks_idx)
     
     # Check constraint for bucket type
