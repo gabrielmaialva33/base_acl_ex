@@ -50,31 +50,34 @@ defmodule Mix.Tasks.Seed do
     Mix.Task.run("app.start")
 
     opts = parse_args(args)
+    handle_reset_if_requested(opts)
+    seed_components(opts)
 
+    print_summary()
+    Logger.info("✅ Database seeding completed successfully!")
+  end
+
+  defp handle_reset_if_requested(opts) do
     if opts[:reset] do
       Logger.warning("🗑️  Resetting database - this will delete ALL data!")
       Mix.shell().yes?("Are you sure you want to continue?") || Mix.raise("Aborted")
       reset_database()
     end
+  end
 
+  defp seed_components(opts) do
     components = opts[:only] || [:permissions, :roles, :role_permissions, :users, :user_roles]
-
     Logger.info("🌱 Starting database seeding with components: #{inspect(components)}")
 
-    Enum.each(components, fn component ->
-      case component do
-        :permissions -> seed_permissions()
-        :roles -> seed_roles()
-        :role_permissions -> seed_role_permissions()
-        :users -> seed_users()
-        :user_roles -> seed_user_roles()
-        _ -> Logger.warning("Unknown component: #{component}")
-      end
-    end)
-
-    print_summary()
-    Logger.info("✅ Database seeding completed successfully!")
+    Enum.each(components, &seed_component/1)
   end
+
+  defp seed_component(:permissions), do: seed_permissions()
+  defp seed_component(:roles), do: seed_roles()
+  defp seed_component(:role_permissions), do: seed_role_permissions()
+  defp seed_component(:users), do: seed_users()
+  defp seed_component(:user_roles), do: seed_user_roles()
+  defp seed_component(unknown), do: Logger.warning("Unknown component: #{unknown}")
 
   defp parse_args(args) do
     {opts, _, _} =

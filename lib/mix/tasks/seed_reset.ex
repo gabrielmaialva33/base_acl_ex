@@ -53,33 +53,38 @@ defmodule Mix.Tasks.SeedReset do
     Mix.Task.run("app.start")
 
     opts = parse_args(args)
+    confirm_reset_unless_forced(opts)
+    clear_components(opts)
+    reseed_data()
 
+    Logger.info("✅ Seed reset completed successfully!")
+  end
+
+  defp confirm_reset_unless_forced(opts) do
     unless opts[:force] do
       Logger.warning("🚨 This will delete seeded data from the database!")
       Mix.shell().yes?("Are you sure you want to continue?") || Mix.raise("Aborted")
     end
+  end
 
+  defp clear_components(opts) do
     components = opts[:only] || [:user_roles, :role_permissions, :users, :roles, :permissions]
-
     Logger.info("🗑️  Starting seed data reset for components: #{inspect(components)}")
 
     # Delete in reverse dependency order
-    Enum.each(components, fn component ->
-      case component do
-        :user_roles -> clear_user_roles()
-        :role_permissions -> clear_role_permissions()
-        :users -> clear_seeded_users()
-        :roles -> clear_system_roles()
-        :permissions -> clear_seeded_permissions()
-        _ -> Logger.warning("Unknown component: #{component}")
-      end
-    end)
+    Enum.each(components, &clear_component/1)
+  end
 
-    # Now reseed with fresh data
+  defp clear_component(:user_roles), do: clear_user_roles()
+  defp clear_component(:role_permissions), do: clear_role_permissions()
+  defp clear_component(:users), do: clear_seeded_users()
+  defp clear_component(:roles), do: clear_system_roles()
+  defp clear_component(:permissions), do: clear_seeded_permissions()
+  defp clear_component(unknown), do: Logger.warning("Unknown component: #{unknown}")
+
+  defp reseed_data do
     Logger.info("🌱 Reseeding with fresh data...")
     Mix.Task.run("seed", [])
-
-    Logger.info("✅ Seed reset completed successfully!")
   end
 
   defp parse_args(args) do
