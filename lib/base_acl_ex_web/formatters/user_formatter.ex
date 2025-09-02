@@ -66,4 +66,3 @@ defmodule BaseAclExWeb.Formatters.UserFormatter do
     }
   end
 end
-
