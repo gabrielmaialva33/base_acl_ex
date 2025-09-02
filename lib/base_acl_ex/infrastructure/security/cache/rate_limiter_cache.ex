@@ -91,22 +91,7 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
 
   # Private functions
 
-  defp expiration_policy do
-    # Items expire after 1 hour of inactivity to prevent memory bloat
-    Cachex.Policy.LRW.new(
-      expiration: :timer.hours(1),
-      lazy: true
-    )
-  end
 
-  defp limit_policy(limit) do
-    # LRU policy when cache reaches size limit
-    Cachex.Policy.LRU.new(
-      size: limit,
-      # Remove 10% when limit reached
-      reclaim: 0.1
-    )
-  end
 
   defp schedule_cleanup do
     Process.send_after(self(), :cleanup, @cleanup_interval)
