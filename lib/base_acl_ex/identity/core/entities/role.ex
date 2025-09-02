@@ -10,7 +10,7 @@ defmodule BaseAclEx.Identity.Core.Entities.Role do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   @timestamps_opts [type: :utc_datetime]
-  @derive {Jason.Encoder, except: [:__meta__, :parent_role, :permissions, :users]}
+  @derive {Jason.Encoder, except: [:__meta__, :parent_role]}
   
   schema "roles" do
     field :name, :string
