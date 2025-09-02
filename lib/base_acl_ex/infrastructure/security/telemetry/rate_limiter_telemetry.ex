@@ -208,8 +208,9 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
 
   defp cache_health_check do
     try do
-      case Cachex.ping(:rate_limiter_cache) do
-        {:ok, :pong} -> true
+      # Test cache by checking if it's running
+      case Cachex.size(:rate_limiter_cache) do
+        {:ok, _} -> true
         _ -> false
       end
     rescue
