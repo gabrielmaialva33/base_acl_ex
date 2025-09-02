@@ -14,16 +14,40 @@ defmodule BaseAclExWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug BaseAclEx.Infrastructure.Security.JWT.GuardianPipeline
+    plug BaseAclEx.Infrastructure.Security.Plugs.EnsureAuthenticated
+  end
+
   scope "/", BaseAclExWeb do
     pipe_through :browser
 
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", BaseAclExWeb do
-  #   pipe_through :api
-  # end
+  # API v1 routes
+  scope "/api/v1", BaseAclExWeb.Api.V1 do
+    pipe_through :api
+
+    # Public authentication routes
+    post "/auth/register", AuthController, :register
+    post "/auth/login", AuthController, :login
+    post "/auth/refresh", AuthController, :refresh
+  end
+
+  scope "/api/v1", BaseAclExWeb.Api.V1 do
+    pipe_through [:api, :api_auth]
+
+    # Protected authentication routes
+    post "/auth/logout", AuthController, :logout
+    get "/auth/me", AuthController, :me
+    get "/auth/verify", AuthController, :verify
+
+    # User management routes
+    resources "/users", UserController, only: [:index, :show, :update, :delete] do
+      get "/permissions", UserController, :permissions, as: :permissions
+    end
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:base_acl_ex, :dev_routes) do

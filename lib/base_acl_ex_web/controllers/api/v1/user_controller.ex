@@ -5,9 +5,10 @@ defmodule BaseAclExWeb.Api.V1.UserController do
   """
 
   use BaseAclExWeb, :controller
+  import Ecto.Query
 
-  alias BaseAclEx.Accounts.Application.Queries.{GetUserByIdQuery, GetUserPermissionsQuery}
   alias BaseAclEx.Accounts.Application.Handlers.{GetUserByIdHandler, GetUserPermissionsHandler}
+  alias BaseAclEx.Accounts.Application.Queries.{GetUserByIdQuery, GetUserPermissionsQuery}
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Persistence.Repo
 

@@ -19,23 +19,27 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     # Profile
     field :first_name, :string
     field :last_name, :string
-    field :phone, :string
+    field :phone_number, :string
     field :avatar_url, :string
 
     # Status
-    field :is_active, :boolean, default: true
-    field :is_deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
+    field :locked_at, :utc_datetime
 
     # Verification
     field :email_verified_at, :utc_datetime
 
     # Security
     field :last_login_at, :utc_datetime
-    field :failed_login_attempts, :integer, default: 0
-    field :locked_until, :utc_datetime
+    field :last_login_ip, :string
+    field :failed_attempts, :integer, default: 0
+    field :login_count, :integer, default: 0
     field :two_factor_enabled, :boolean, default: false
     field :two_factor_secret, :string
+    
+    # Preferences
+    field :newsletter_opt_in, :boolean, default: false
+    field :terms_accepted_at, :utc_datetime
 
     # Metadata
     field :metadata, :map, default: %{}
