@@ -63,20 +63,21 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
     end
   end
 
-  defp generate_tokens(user, command \\ nil) do
-    if command do
-      opts = [
-        ip_address: command.ip_address,
-        user_agent: command.user_agent,
-        remember_me: Map.get(command, :remember_me, false),
-        device_id: generate_device_id(command),
-        device_name: parse_device_name(command.user_agent)
-      ]
+  defp generate_tokens(user, nil), do: GuardianImpl.generate_tokens(user)
 
-      GuardianImpl.generate_tokens_with_metadata(user, opts)
-    else
-      GuardianImpl.generate_tokens(user)
-    end
+  defp generate_tokens(user, command) do
+    opts = build_token_options(command)
+    GuardianImpl.generate_tokens_with_metadata(user, opts)
+  end
+
+  defp build_token_options(command) do
+    [
+      ip_address: command.ip_address,
+      user_agent: command.user_agent,
+      remember_me: Map.get(command, :remember_me, false),
+      device_id: generate_device_id(command),
+      device_name: parse_device_name(command.user_agent)
+    ]
   end
 
   defp warm_permission_cache(user) do

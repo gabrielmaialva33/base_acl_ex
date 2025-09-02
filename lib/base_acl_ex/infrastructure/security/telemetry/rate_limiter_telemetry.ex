@@ -100,45 +100,47 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   def health_check do
     cache_healthy = cache_health_check()
     block_rate = calculate_block_rate()
+    issues = collect_health_issues(cache_healthy, block_rate)
 
-    issues = []
+    build_health_status(issues, cache_healthy, block_rate)
+  end
 
-    issues =
-      if cache_healthy do
-        issues
-      else
-        ["Cache not responding" | issues]
-      end
+  defp collect_health_issues(cache_healthy, block_rate) do
+    []
+    |> add_cache_issue(cache_healthy)
+    |> add_block_rate_issue(block_rate)
+  end
 
-    issues =
-      if block_rate > 0.5 do
-        ["High block rate: #{Float.round(block_rate * 100, 1)}%" | issues]
-      else
-        issues
-      end
+  defp add_cache_issue(issues, true), do: issues
+  defp add_cache_issue(issues, false), do: ["Cache not responding" | issues]
 
-    case issues do
-      [] ->
-        %{
-          status: :healthy,
-          message: "Rate limiting system operating normally",
-          metrics: %{
-            cache_healthy: cache_healthy,
-            block_rate: block_rate
-          }
-        }
+  defp add_block_rate_issue(issues, block_rate) when block_rate > 0.5 do
+    ["High block rate: #{Float.round(block_rate * 100, 1)}%" | issues]
+  end
 
-      issues ->
-        %{
-          status: :degraded,
-          message: "Rate limiting system has issues",
-          issues: issues,
-          metrics: %{
-            cache_healthy: cache_healthy,
-            block_rate: block_rate
-          }
-        }
-    end
+  defp add_block_rate_issue(issues, _), do: issues
+
+  defp build_health_status([], cache_healthy, block_rate) do
+    %{
+      status: :healthy,
+      message: "Rate limiting system operating normally",
+      metrics: %{
+        cache_healthy: cache_healthy,
+        block_rate: block_rate
+      }
+    }
+  end
+
+  defp build_health_status(issues, cache_healthy, block_rate) do
+    %{
+      status: :degraded,
+      message: "Rate limiting system has issues",
+      issues: issues,
+      metrics: %{
+        cache_healthy: cache_healthy,
+        block_rate: block_rate
+      }
+    }
   end
 
   # Private functions
@@ -181,7 +183,9 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   end
 
   defp get_cache_metrics do
-    case BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache.get_stats() do
+    alias BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache
+
+    case RateLimiterCache.get_stats() do
       stats when is_map(stats) ->
         %{
           hit_rate: calculate_hit_rate(stats),

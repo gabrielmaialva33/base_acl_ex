@@ -201,6 +201,8 @@ defmodule BaseAclEx.Identity.Core.ValueObjects.Scope do
   def to_string(%__MODULE__{type: type, scope_id: scope_id}), do: "#{type}:#{scope_id}"
 
   defimpl String.Chars do
-    def to_string(scope), do: BaseAclEx.Identity.Core.ValueObjects.Scope.to_string(scope)
+    alias BaseAclEx.Identity.Core.ValueObjects.Scope
+
+    def to_string(scope), do: Scope.to_string(scope)
   end
 end

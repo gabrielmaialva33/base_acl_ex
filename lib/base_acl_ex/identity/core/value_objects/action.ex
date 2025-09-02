@@ -162,6 +162,8 @@ defmodule BaseAclEx.Identity.Core.ValueObjects.Action do
   end
 
   defimpl String.Chars do
-    def to_string(action), do: BaseAclEx.Identity.Core.ValueObjects.Action.to_string(action)
+    alias BaseAclEx.Identity.Core.ValueObjects.Action
+
+    def to_string(action), do: Action.to_string(action)
   end
 end

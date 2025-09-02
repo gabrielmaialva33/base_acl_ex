@@ -152,8 +152,13 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Password do
   end
 
   @doc """
-  Verifies a plain text password against the hash.
+  Verifies a plain text password against a hash.
+  Can accept either (plain_password, hash_string) or (Password struct, plain_password).
   """
+  def verify(plain_password, hash) when is_binary(plain_password) and is_binary(hash) do
+    Argon2.verify_pass(plain_password, hash)
+  end
+
   def verify(%__MODULE__{hash: hash}, plain_password) when is_binary(plain_password) do
     Argon2.verify_pass(plain_password, hash)
   end

@@ -101,6 +101,8 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Email do
   def to_string(%__MODULE__{value: value}), do: value
 
   defimpl String.Chars do
-    def to_string(email), do: BaseAclEx.Accounts.Core.ValueObjects.Email.to_string(email)
+    alias BaseAclEx.Accounts.Core.ValueObjects.Email
+
+    def to_string(email), do: Email.to_string(email)
   end
 end

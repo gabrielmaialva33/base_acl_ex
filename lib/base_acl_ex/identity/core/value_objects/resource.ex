@@ -112,6 +112,8 @@ defmodule BaseAclEx.Identity.Core.ValueObjects.Resource do
   end
 
   defimpl String.Chars do
-    def to_string(resource), do: BaseAclEx.Identity.Core.ValueObjects.Resource.to_string(resource)
+    alias BaseAclEx.Identity.Core.ValueObjects.Resource
+
+    def to_string(resource), do: Resource.to_string(resource)
   end
 end

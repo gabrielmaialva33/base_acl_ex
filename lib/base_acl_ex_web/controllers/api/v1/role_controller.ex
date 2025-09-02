@@ -88,32 +88,34 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      attrs = %{
-        name: Map.get(params, "name"),
-        slug: Map.get(params, "slug"),
-        description: Map.get(params, "description"),
-        priority: Map.get(params, "priority", 100),
-        metadata: Map.get(params, "metadata", %{}),
-        is_system: Map.get(params, "is_system", false)
-      }
-
-      changeset = Role.changeset(%Role{}, attrs)
-
-      case Repo.insert(changeset) do
-        {:ok, role} ->
-          conn
-          |> put_status(:created)
-          |> render(:show, role: role)
-
-        {:error, changeset} ->
-          conn
-          |> put_status(:unprocessable_entity)
-          |> render(:error, changeset: changeset)
-      end
+      create_role(conn, params)
     else
-      conn
-      |> put_status(:forbidden)
-      |> render(:error, message: "You don't have permission to create roles")
+      render_forbidden(conn, "You don't have permission to create roles")
+    end
+  end
+
+  defp create_role(conn, params) do
+    attrs = %{
+      name: Map.get(params, "name"),
+      slug: Map.get(params, "slug"),
+      description: Map.get(params, "description"),
+      priority: Map.get(params, "priority", 100),
+      metadata: Map.get(params, "metadata", %{}),
+      is_system: Map.get(params, "is_system", false)
+    }
+
+    changeset = Role.changeset(%Role{}, attrs)
+
+    case Repo.insert(changeset) do
+      {:ok, role} ->
+        conn
+        |> put_status(:created)
+        |> render(:show, role: role)
+
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(:error, changeset: changeset)
     end
   end
 
@@ -124,29 +126,31 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      role = Repo.get!(Role, role_id)
-
-      attrs =
-        params
-        |> Map.take(["name", "description", "priority", "metadata"])
-
-      changeset = Role.changeset(role, attrs)
-
-      case Repo.update(changeset) do
-        {:ok, updated_role} ->
-          conn
-          |> put_status(:ok)
-          |> render(:show, role: updated_role)
-
-        {:error, changeset} ->
-          conn
-          |> put_status(:unprocessable_entity)
-          |> render(:error, changeset: changeset)
-      end
+      update_role(conn, role_id, params)
     else
-      conn
-      |> put_status(:forbidden)
-      |> render(:error, message: "You don't have permission to update roles")
+      render_forbidden(conn, "You don't have permission to update roles")
+    end
+  end
+
+  defp update_role(conn, role_id, params) do
+    role = Repo.get!(Role, role_id)
+
+    attrs =
+      params
+      |> Map.take(["name", "description", "priority", "metadata"])
+
+    changeset = Role.changeset(role, attrs)
+
+    case Repo.update(changeset) do
+      {:ok, updated_role} ->
+        conn
+        |> put_status(:ok)
+        |> render(:show, role: updated_role)
+
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(:error, changeset: changeset)
     end
   end
 
@@ -157,31 +161,35 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      role = Repo.get!(Role, role_id)
-
-      if role.is_system do
-        conn
-        |> put_status(:forbidden)
-        |> render(:error, message: "System roles cannot be deleted")
-      else
-        changeset = Role.changeset(role, %{deleted_at: DateTime.utc_now()})
-
-        case Repo.update(changeset) do
-          {:ok, _} ->
-            conn
-            |> put_status(:ok)
-            |> render(:delete)
-
-          {:error, changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> render(:error, changeset: changeset)
-        end
-      end
+      delete_role(conn, role_id)
     else
-      conn
-      |> put_status(:forbidden)
-      |> render(:error, message: "You don't have permission to delete roles")
+      render_forbidden(conn, "You don't have permission to delete roles")
+    end
+  end
+
+  defp delete_role(conn, role_id) do
+    role = Repo.get!(Role, role_id)
+
+    if role.is_system do
+      render_forbidden(conn, "System roles cannot be deleted")
+    else
+      perform_delete(conn, role)
+    end
+  end
+
+  defp perform_delete(conn, role) do
+    changeset = Role.changeset(role, %{deleted_at: DateTime.utc_now()})
+
+    case Repo.update(changeset) do
+      {:ok, _} ->
+        conn
+        |> put_status(:ok)
+        |> render(:delete)
+
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(:error, changeset: changeset)
     end
   end
 
@@ -219,26 +227,28 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      command =
-        AssignRoleToUserCommand.new(%{
-          user_id: user_id,
-          role_id: role_id,
-          assigned_by: current_user.id,
-          expires_at: Map.get(params, "expires_at"),
-          reason: Map.get(params, "reason"),
-          metadata: Map.get(params, "metadata", %{})
-        })
-
-      with {:ok, command} <- AssignRoleToUserCommand.validate(command),
-           {:ok, _assignment} <- AssignRoleToUserHandler.execute(command) do
-        conn
-        |> put_status(:ok)
-        |> render(:assign_user)
-      end
+      perform_assign_user(conn, current_user, role_id, user_id, params)
     else
+      render_forbidden(conn, "You don't have permission to assign roles")
+    end
+  end
+
+  defp perform_assign_user(conn, current_user, role_id, user_id, params) do
+    command =
+      AssignRoleToUserCommand.new(%{
+        user_id: user_id,
+        role_id: role_id,
+        assigned_by: current_user.id,
+        expires_at: Map.get(params, "expires_at"),
+        reason: Map.get(params, "reason"),
+        metadata: Map.get(params, "metadata", %{})
+      })
+
+    with {:ok, command} <- AssignRoleToUserCommand.validate(command),
+         {:ok, _assignment} <- AssignRoleToUserHandler.execute(command) do
       conn
-      |> put_status(:forbidden)
-      |> render(:error, message: "You don't have permission to assign roles")
+      |> put_status(:ok)
+      |> render(:assign_user)
     end
   end
 
@@ -249,24 +259,26 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      command =
-        RemoveRoleFromUserCommand.new(%{
-          user_id: user_id,
-          role_id: role_id,
-          revoked_by: current_user.id,
-          reason: Map.get(params, "reason")
-        })
-
-      with {:ok, command} <- RemoveRoleFromUserCommand.validate(command),
-           {:ok, _} <- RemoveRoleFromUserHandler.execute(command) do
-        conn
-        |> put_status(:ok)
-        |> render(:remove_user)
-      end
+      perform_remove_user(conn, current_user, role_id, user_id, params)
     else
+      render_forbidden(conn, "You don't have permission to remove roles")
+    end
+  end
+
+  defp perform_remove_user(conn, current_user, role_id, user_id, params) do
+    command =
+      RemoveRoleFromUserCommand.new(%{
+        user_id: user_id,
+        role_id: role_id,
+        revoked_by: current_user.id,
+        reason: Map.get(params, "reason")
+      })
+
+    with {:ok, command} <- RemoveRoleFromUserCommand.validate(command),
+         {:ok, _} <- RemoveRoleFromUserHandler.execute(command) do
       conn
-      |> put_status(:forbidden)
-      |> render(:error, message: "You don't have permission to remove roles")
+      |> put_status(:ok)
+      |> render(:remove_user)
     end
   end
 
@@ -285,5 +297,11 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
       )
 
     Repo.exists?(query)
+  end
+
+  defp render_forbidden(conn, message) do
+    conn
+    |> put_status(:forbidden)
+    |> render(:error, message: message)
   end
 end

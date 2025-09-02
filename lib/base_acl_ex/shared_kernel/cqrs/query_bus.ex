@@ -107,10 +107,6 @@ defmodule BaseAclEx.SharedKernel.CQRS.QueryBus do
          {:ok, result} <- apply_middleware(result, state.middleware, :after) do
       log_query_execution(query, :success)
       {:ok, result}
-    else
-      {:error, reason} = error ->
-        log_query_execution(query, :failure, reason)
-        error
     end
   end
 

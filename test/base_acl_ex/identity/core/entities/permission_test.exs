@@ -1,10 +1,10 @@
 defmodule BaseAclEx.Identity.Core.Entities.PermissionTest do
-  use BaseAclEx.DataCase
+  use BaseAclEx.DataCase, async: true
 
-  alias BaseAclEx.Identity.Core.Entities.Permission
   alias BaseAclEx.Factory
-  alias BaseAclEx.TestSupport.TestHelpers
-  import TestHelpers
+  alias BaseAclEx.Identity.Core.Entities.Permission
+
+  import BaseAclEx.TestSupport.TestHelpers
 
   describe "new/1" do
     test "creates a valid permission with required fields" do

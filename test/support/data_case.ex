@@ -28,7 +28,7 @@ defmodule BaseAclEx.DataCase do
   end
 
   setup tags do
-    BaseAclEx.DataCase.setup_sandbox(tags)
+    setup_sandbox(tags)
     :ok
   end
 
