@@ -70,6 +70,17 @@ defmodule BaseAclExWeb.Router do
       post "/roles/:role_id", PermissionController, :assign_role, as: :assign_role
       delete "/roles/:role_id", PermissionController, :remove_role, as: :remove_role
     end
+
+    # Admin rate limiter management routes
+    scope "/admin" do
+      get "/rate-limiter/stats", RateLimiterController, :stats
+      get "/rate-limiter/limits", RateLimiterController, :list_limits
+      get "/rate-limiter/limits/:identifier", RateLimiterController, :show_limit
+      delete "/rate-limiter/limits/:identifier", RateLimiterController, :remove_limit
+      delete "/rate-limiter/limits", RateLimiterController, :clear_all_limits
+      get "/rate-limiter/export", RateLimiterController, :export_data
+      post "/rate-limiter/test", RateLimiterController, :test_limit
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
