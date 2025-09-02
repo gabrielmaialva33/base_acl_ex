@@ -16,8 +16,8 @@ defmodule BaseAclEx.Application do
       BaseAclEx.Identity.Application.Services.PermissionCache,
       BaseAclEx.SharedKernel.CQRS.CommandBus,
       BaseAclEx.SharedKernel.CQRS.QueryBus,
-      # Start a worker by calling: BaseAclEx.Worker.start_link(arg)
-      # {BaseAclEx.Worker, arg},
+      # Security workers
+      BaseAclEx.Infrastructure.Security.Workers.TokenCleanupWorker,
       # Start to serve requests, typically the last entry
       BaseAclExWeb.Endpoint
     ]

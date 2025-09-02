@@ -96,4 +96,12 @@ config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
   secret_key:
     System.get_env("GUARDIAN_SECRET_KEY") ||
       "vErY_sEcReT_kEy_fOr_dEvElOpMeNt_OnLy_pLeAsE_cHaNgE_iN_pRoDuCtIoN",
-  ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes}
+  ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes},
+  # Enable JTI (JWT ID) for token revocation support
+  token_verify_module: Guardian.Token.Jwt.Verify,
+  allowed_algos: ["HS256"],
+  # Add JTI to all tokens for revocation tracking
+  token_ttl: %{
+    "access" => {15, :minutes},
+    "refresh" => {7, :days}
+  }

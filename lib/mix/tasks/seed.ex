@@ -1,37 +1,104 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     BaseAclEx.Repo.insert!(%BaseAclEx.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+defmodule Mix.Tasks.Seed do
+  @shortdoc "Seeds the database with development data"
 
-alias BaseAclEx.Repo
-alias BaseAclEx.Accounts.Core.Entities.User
-alias BaseAclEx.Identity.Core.Entities.{Role, Permission, RolePermission, UserRole}
-
-require Logger
-
-defmodule BaseAclEx.Seeds do
   @moduledoc """
-  Comprehensive seed data for BaseAclEx development and testing.
-  This module provides idempotent seeding functions for roles, permissions, and users.
+  Mix task for seeding the database with comprehensive development data.
+
+  ## Usage
+
+      # Run full seeding (permissions, roles, users)
+      mix seed
+
+      # Run with specific components
+      mix seed --only permissions
+      mix seed --only roles
+      mix seed --only users
+
+      # Clear existing data before seeding (destructive!)
+      mix seed --reset
+
+  ## Examples
+
+      # Seed everything
+      mix seed
+
+      # Only seed permissions and roles
+      mix seed --only permissions,roles
+
+      # Reset database and seed with fresh data
+      mix seed --reset
+
+  ## Safety
+
+  This task is idempotent - it can be run multiple times safely.
+  Existing records are not duplicated or modified.
   """
 
-  def run do
-    Logger.info("🌱 Starting database seeding...")
+  use Mix.Task
+  alias BaseAclEx.Repo
+  alias BaseAclEx.Accounts.Core.Entities.User
+  alias BaseAclEx.Identity.Core.Entities.{Role, Permission, RolePermission, UserRole}
 
-    seed_permissions()
-    seed_roles()
-    seed_role_permissions()
-    seed_users()
-    seed_user_roles()
+  require Logger
 
+  @doc false
+  def run(args) do
+    Mix.Task.run("app.start")
+
+    opts = parse_args(args)
+
+    if opts[:reset] do
+      Logger.warning("🗑️  Resetting database - this will delete ALL data!")
+      Mix.shell().yes?("Are you sure you want to continue?") || Mix.raise("Aborted")
+      reset_database()
+    end
+
+    components = opts[:only] || [:permissions, :roles, :role_permissions, :users, :user_roles]
+
+    Logger.info("🌱 Starting database seeding with components: #{inspect(components)}")
+
+    Enum.each(components, fn component ->
+      case component do
+        :permissions -> seed_permissions()
+        :roles -> seed_roles()
+        :role_permissions -> seed_role_permissions()
+        :users -> seed_users()
+        :user_roles -> seed_user_roles()
+        _ -> Logger.warning("Unknown component: #{component}")
+      end
+    end)
+
+    print_summary()
     Logger.info("✅ Database seeding completed successfully!")
+  end
+
+  defp parse_args(args) do
+    {opts, _, _} =
+      OptionParser.parse(args,
+        switches: [
+          only: :string,
+          reset: :boolean
+        ],
+        aliases: [
+          o: :only,
+          r: :reset
+        ]
+      )
+
+    # Parse comma-separated components
+    components =
+      case opts[:only] do
+        nil -> nil
+        string -> string |> String.split(",") |> Enum.map(&String.to_atom(String.trim(&1)))
+      end
+
+    opts
+    |> Keyword.put(:only, components)
+  end
+
+  defp reset_database do
+    Logger.info("🗑️  Dropping and recreating database...")
+    Mix.Task.run("ecto.reset", ["--no-start"])
   end
 
   defp seed_permissions do
@@ -443,28 +510,37 @@ defmodule BaseAclEx.Seeds do
       }
     ]
 
-    Enum.each(permissions, fn permission_attrs ->
-      name = "#{permission_attrs.resource}.#{permission_attrs.action}.#{permission_attrs.context}"
+    count = length(permissions)
+    Logger.info("  Creating #{count} permissions...")
 
-      case Repo.get_by(Permission, name: name) do
-        nil ->
-          case Permission.new(permission_attrs) do
-            %Ecto.Changeset{valid?: true} = changeset ->
-              Repo.insert!(changeset)
-              Logger.debug("  ✓ Created permission: #{name}")
+    {created, existing} =
+      Enum.reduce(permissions, {0, 0}, fn permission_attrs, {created_count, existing_count} ->
+        name =
+          "#{permission_attrs.resource}.#{permission_attrs.action}.#{permission_attrs.context}"
 
-            %Ecto.Changeset{valid?: false} = changeset ->
-              Logger.error(
-                "  ✗ Failed to create permission #{name}: #{inspect(changeset.errors)}"
-              )
-          end
+        case Repo.get_by(Permission, name: name) do
+          nil ->
+            case Permission.new(permission_attrs) do
+              %Ecto.Changeset{valid?: true} = changeset ->
+                Repo.insert!(changeset)
+                Logger.debug("    ✓ Created permission: #{name}")
+                {created_count + 1, existing_count}
 
-        _existing ->
-          Logger.debug("  → Permission already exists: #{name}")
-      end
-    end)
+              %Ecto.Changeset{valid?: false} = changeset ->
+                Logger.error(
+                  "    ✗ Failed to create permission #{name}: #{inspect(changeset.errors)}"
+                )
 
-    Logger.info("📋 Permissions seeding completed")
+                {created_count, existing_count}
+            end
+
+          _existing ->
+            Logger.debug("    → Permission already exists: #{name}")
+            {created_count, existing_count + 1}
+        end
+      end)
+
+    Logger.info("📋 Permissions seeding completed: #{created} created, #{existing} existing")
   end
 
   defp seed_roles do
@@ -544,26 +620,34 @@ defmodule BaseAclEx.Seeds do
       }
     ]
 
-    Enum.each(roles, fn role_attrs ->
-      case Repo.get_by(Role, slug: role_attrs.slug) do
-        nil ->
-          case Role.new(role_attrs) do
-            %Ecto.Changeset{valid?: true} = changeset ->
-              Repo.insert!(changeset)
-              Logger.debug("  ✓ Created role: #{role_attrs.name}")
+    count = length(roles)
+    Logger.info("  Creating #{count} roles...")
 
-            %Ecto.Changeset{valid?: false} = changeset ->
-              Logger.error(
-                "  ✗ Failed to create role #{role_attrs.name}: #{inspect(changeset.errors)}"
-              )
-          end
+    {created, existing} =
+      Enum.reduce(roles, {0, 0}, fn role_attrs, {created_count, existing_count} ->
+        case Repo.get_by(Role, slug: role_attrs.slug) do
+          nil ->
+            case Role.new(role_attrs) do
+              %Ecto.Changeset{valid?: true} = changeset ->
+                Repo.insert!(changeset)
+                Logger.debug("    ✓ Created role: #{role_attrs.name}")
+                {created_count + 1, existing_count}
 
-        existing ->
-          Logger.debug("  → Role already exists: #{existing.name}")
-      end
-    end)
+              %Ecto.Changeset{valid?: false} = changeset ->
+                Logger.error(
+                  "    ✗ Failed to create role #{role_attrs.name}: #{inspect(changeset.errors)}"
+                )
 
-    Logger.info("👥 Roles seeding completed")
+                {created_count, existing_count}
+            end
+
+          existing ->
+            Logger.debug("    → Role already exists: #{existing.name}")
+            {created_count, existing_count + 1}
+        end
+      end)
+
+    Logger.info("👥 Roles seeding completed: #{created} created, #{existing} existing")
   end
 
   defp seed_role_permissions do
@@ -672,36 +756,53 @@ defmodule BaseAclEx.Seeds do
       ]
     }
 
-    Enum.each(role_permissions, fn {role_slug, permission_names} ->
-      role = Repo.get_by!(Role, slug: role_slug)
+    total_associations = Enum.sum(Enum.map(role_permissions, fn {_, perms} -> length(perms) end))
+    Logger.info("  Creating #{total_associations} role-permission associations...")
 
-      Enum.each(permission_names, fn permission_name ->
-        permission = Repo.get_by(Permission, name: permission_name)
+    {created, existing, missing} =
+      Enum.reduce(role_permissions, {0, 0, 0}, fn {role_slug, permission_names},
+                                                  {created_count, existing_count, missing_count} ->
+        role = Repo.get_by!(Role, slug: role_slug)
 
-        if permission do
-          case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
-            nil ->
-              %RolePermission{}
-              |> RolePermission.changeset(%{
-                role_id: role.id,
-                permission_id: permission.id,
-                is_active: true,
-                metadata: %{seeded: true}
-              })
-              |> Repo.insert!()
+        Enum.reduce(
+          permission_names,
+          {created_count, existing_count, missing_count},
+          fn permission_name, {cc, ec, mc} ->
+            permission = Repo.get_by(Permission, name: permission_name)
 
-              Logger.debug("  ✓ Granted #{permission_name} to #{role.name}")
+            if permission do
+              case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
+                nil ->
+                  %RolePermission{}
+                  |> RolePermission.changeset(%{
+                    role_id: role.id,
+                    permission_id: permission.id,
+                    is_active: true,
+                    metadata: %{seeded: true}
+                  })
+                  |> Repo.insert!()
 
-            _existing ->
-              Logger.debug("  → Permission #{permission_name} already granted to #{role.name}")
+                  Logger.debug("    ✓ Granted #{permission_name} to #{role.name}")
+                  {cc + 1, ec, mc}
+
+                _existing ->
+                  Logger.debug(
+                    "    → Permission #{permission_name} already granted to #{role.name}"
+                  )
+
+                  {cc, ec + 1, mc}
+              end
+            else
+              Logger.warning("    ⚠ Permission not found: #{permission_name}")
+              {cc, ec, mc + 1}
+            end
           end
-        else
-          Logger.warning("  ⚠ Permission not found: #{permission_name}")
-        end
+        )
       end)
-    end)
 
-    Logger.info("🔗 Role-permission associations completed")
+    Logger.info(
+      "🔗 Role-permission associations completed: #{created} created, #{existing} existing, #{missing} missing"
+    )
   end
 
   defp seed_users do
@@ -787,26 +888,34 @@ defmodule BaseAclEx.Seeds do
       }
     ]
 
-    Enum.each(users, fn user_attrs ->
-      case Repo.get_by(User, email: user_attrs.email) do
-        nil ->
-          case User.new(user_attrs) do
-            %Ecto.Changeset{valid?: true} = changeset ->
-              Repo.insert!(changeset)
-              Logger.debug("  ✓ Created user: #{user_attrs.email}")
+    count = length(users)
+    Logger.info("  Creating #{count} users...")
 
-            %Ecto.Changeset{valid?: false} = changeset ->
-              Logger.error(
-                "  ✗ Failed to create user #{user_attrs.email}: #{inspect(changeset.errors)}"
-              )
-          end
+    {created, existing} =
+      Enum.reduce(users, {0, 0}, fn user_attrs, {created_count, existing_count} ->
+        case Repo.get_by(User, email: user_attrs.email) do
+          nil ->
+            case User.new(user_attrs) do
+              %Ecto.Changeset{valid?: true} = changeset ->
+                Repo.insert!(changeset)
+                Logger.debug("    ✓ Created user: #{user_attrs.email}")
+                {created_count + 1, existing_count}
 
-        existing ->
-          Logger.debug("  → User already exists: #{existing.email}")
-      end
-    end)
+              %Ecto.Changeset{valid?: false} = changeset ->
+                Logger.error(
+                  "    ✗ Failed to create user #{user_attrs.email}: #{inspect(changeset.errors)}"
+                )
 
-    Logger.info("👤 Users seeding completed")
+                {created_count, existing_count}
+            end
+
+          existing ->
+            Logger.debug("    → User already exists: #{existing.email}")
+            {created_count, existing_count + 1}
+        end
+      end)
+
+    Logger.info("👤 Users seeding completed: #{created} created, #{existing} existing")
   end
 
   defp seed_user_roles do
@@ -822,34 +931,61 @@ defmodule BaseAclEx.Seeds do
       {"guest@example.com", "guest"}
     ]
 
-    Enum.each(user_role_assignments, fn {email, role_slug} ->
-      user = Repo.get_by!(User, email: email)
-      role = Repo.get_by!(Role, slug: role_slug)
+    count = length(user_role_assignments)
+    Logger.info("  Creating #{count} user-role assignments...")
 
-      case Repo.get_by(UserRole, user_id: user.id, role_id: role.id) do
-        nil ->
-          %UserRole{}
-          |> UserRole.changeset(%{
-            user_id: user.id,
-            role_id: role.id,
-            granted_at: DateTime.utc_now(),
-            is_active: true,
-            scope: "global",
-            reason: "Initial seeding - default role assignment",
-            metadata: %{seeded: true}
-          })
-          |> Repo.insert!()
+    {created, existing} =
+      Enum.reduce(user_role_assignments, {0, 0}, fn {email, role_slug},
+                                                    {created_count, existing_count} ->
+        user = Repo.get_by!(User, email: email)
+        role = Repo.get_by!(Role, slug: role_slug)
 
-          Logger.debug("  ✓ Assigned #{role.name} to #{user.email}")
+        case Repo.get_by(UserRole, user_id: user.id, role_id: role.id) do
+          nil ->
+            %UserRole{}
+            |> UserRole.changeset(%{
+              user_id: user.id,
+              role_id: role.id,
+              granted_at: DateTime.utc_now(),
+              is_active: true,
+              scope: "global",
+              reason: "Initial seeding - default role assignment",
+              metadata: %{seeded: true}
+            })
+            |> Repo.insert!()
 
-        _existing ->
-          Logger.debug("  → Role #{role.name} already assigned to #{user.email}")
-      end
-    end)
+            Logger.debug("    ✓ Assigned #{role.name} to #{user.email}")
+            {created_count + 1, existing_count}
 
-    Logger.info("🎭 User-role assignments completed")
+          _existing ->
+            Logger.debug("    → Role #{role.name} already assigned to #{user.email}")
+            {created_count, existing_count + 1}
+        end
+      end)
+
+    Logger.info("🎭 User-role assignments completed: #{created} created, #{existing} existing")
+  end
+
+  defp print_summary do
+    Logger.info("\n📊 Database Summary:")
+
+    permission_count = Repo.aggregate(Permission, :count, :id)
+    role_count = Repo.aggregate(Role, :count, :id)
+    user_count = Repo.aggregate(User, :count, :id)
+    role_permission_count = Repo.aggregate(RolePermission, :count, :id)
+    user_role_count = Repo.aggregate(UserRole, :count, :id)
+
+    Logger.info("  📋 Permissions: #{permission_count}")
+    Logger.info("  👥 Roles: #{role_count}")
+    Logger.info("  👤 Users: #{user_count}")
+    Logger.info("  🔗 Role-Permission associations: #{role_permission_count}")
+    Logger.info("  🎭 User-Role assignments: #{user_role_count}")
+
+    Logger.info("\n🔐 Sample Login Credentials:")
+    Logger.info("  Super Admin: superadmin@example.com / SuperAdmin123!")
+    Logger.info("  Admin:       admin@example.com / Admin123!")
+    Logger.info("  Moderator:   moderator@example.com / Moderator123!")
+    Logger.info("  User:        john.doe@example.com / JohnDoe123!")
+    Logger.info("  Guest:       guest@example.com / Guest123!")
   end
 end
-
-# Run the seeding
-BaseAclEx.Seeds.run()

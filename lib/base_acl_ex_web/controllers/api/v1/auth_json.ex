@@ -87,4 +87,66 @@ defmodule BaseAclExWeb.Api.V1.AuthJSON do
       }
     }
   end
+
+  @doc """
+  Renders logout all devices response.
+  """
+  def logout_all(%{result: result}) do
+    %{
+      data: %{
+        message: "Successfully logged out from all devices",
+        revoked_tokens: result.revoked_count
+      }
+    }
+  end
+
+  @doc """
+  Renders user devices response.
+  """
+  def devices(%{devices: devices}) do
+    %{
+      data: %{
+        devices: Enum.map(devices, &render_device/1)
+      }
+    }
+  end
+
+  @doc """
+  Renders device revocation response.
+  """
+  def revoke_device(%{result: result}) do
+    %{
+      data: %{
+        message: "Device tokens revoked successfully",
+        revoked_tokens: result.revoked_count
+      }
+    }
+  end
+
+  @doc """
+  Renders token statistics response.
+  """
+  def token_stats(%{stats: stats}) do
+    %{
+      data: %{
+        active_tokens: stats.active_tokens,
+        revoked_tokens: stats.revoked_tokens,
+        expired_tokens: stats.expired_tokens,
+        total_tokens: stats.total_tokens,
+        last_used_at: stats.last_used_at
+      }
+    }
+  end
+
+  # Private helpers
+
+  defp render_device(device) do
+    %{
+      device_id: device.device_id,
+      device_name: device.device_name,
+      user_agent: device.user_agent,
+      last_used_at: device.last_used_at,
+      token_count: device.token_count
+    }
+  end
 end

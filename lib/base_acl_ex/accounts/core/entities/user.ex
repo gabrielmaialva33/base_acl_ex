@@ -19,27 +19,23 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     # Profile
     field :first_name, :string
     field :last_name, :string
-    field :phone_number, :string
+    field :phone, :string
     field :avatar_url, :string
 
-    # Status
+    # Status  
+    field :is_active, :boolean, default: true
+    field :is_deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
-    field :locked_at, :utc_datetime
 
     # Verification
     field :email_verified_at, :utc_datetime
 
     # Security
     field :last_login_at, :utc_datetime
-    field :last_login_ip, :string
-    field :failed_attempts, :integer, default: 0
-    field :login_count, :integer, default: 0
+    field :failed_login_attempts, :integer, default: 0
+    field :locked_until, :utc_datetime
     field :two_factor_enabled, :boolean, default: false
     field :two_factor_secret, :string
-
-    # Preferences
-    field :newsletter_opt_in, :boolean, default: false
-    field :terms_accepted_at, :utc_datetime
 
     # Metadata
     field :metadata, :map, default: %{}
@@ -59,7 +55,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     :username,
     :first_name,
     :last_name,
-    :phone_number,
+    :phone,
     :avatar_url,
     :metadata,
     :preferences,
@@ -68,7 +64,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   @update_fields [
     :first_name,
     :last_name,
-    :phone_number,
+    :phone,
     :avatar_url,
     :username,
     :metadata,
@@ -128,8 +124,8 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     user
     |> change(%{
       last_login_at: DateTime.utc_now(),
-      failed_attempts: 0,
-      locked_at: nil
+      failed_login_attempts: 0,
+      locked_until: nil
     })
     |> add_login_event(ip_address)
   end
@@ -138,13 +134,13 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   Records a failed login attempt.
   """
   def record_failed_login(%__MODULE__{} = user) do
-    attempts = user.failed_attempts + 1
-    locked_at = if attempts >= 5, do: DateTime.add(DateTime.utc_now(), 900, :second), else: nil
+    attempts = user.failed_login_attempts + 1
+    locked_until = if attempts >= 5, do: DateTime.add(DateTime.utc_now(), 900, :second), else: nil
 
     user
     |> change(%{
-      failed_attempts: attempts,
-      locked_at: locked_at
+      failed_login_attempts: attempts,
+      locked_until: locked_until
     })
     |> add_failed_login_event()
   end
@@ -198,11 +194,11 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   @doc """
   Checks if the user account is locked.
   """
-  def locked?(%__MODULE__{locked_at: nil}), do: false
+  def locked?(%__MODULE__{locked_until: nil}), do: false
 
-  def locked?(%__MODULE__{locked_at: locked_at}) do
-    # Consider locked if it was locked in the last 15 minutes
-    DateTime.compare(DateTime.utc_now(), DateTime.add(locked_at, 900, :second)) == :lt
+  def locked?(%__MODULE__{locked_until: locked_until}) do
+    # Consider locked if locked_until is in the future
+    DateTime.compare(locked_until, DateTime.utc_now()) == :gt
   end
 
   @doc """
@@ -229,9 +225,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
       :first_name,
       :last_name,
       :username,
-      :phone_number,
-      :newsletter_opt_in,
-      :terms_accepted_at
+      :phone
     ])
     |> validate_required([:email, :password_hash, :first_name, :last_name])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
@@ -244,7 +238,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   """
   def update_changeset(%__MODULE__{} = user, attrs) do
     user
-    |> cast(attrs, [:first_name, :last_name, :username, :phone_number, :avatar_url])
+    |> cast(attrs, [:first_name, :last_name, :username, :phone, :avatar_url])
     |> validate_length(:first_name, min: 1, max: 100)
     |> validate_length(:last_name, min: 1, max: 100)
     |> validate_length(:username, min: 3, max: 50)
@@ -314,7 +308,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
 
   defp validate_phone(changeset) do
     changeset
-    |> validate_format(:phone_number, ~r/^\+?[1-9]\d{1,14}$/,
+    |> validate_format(:phone, ~r/^\+?[1-9]\d{1,14}$/,
       message: "must be a valid international phone number"
     )
   end
@@ -387,7 +381,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
 
   defp add_failed_login_event(changeset) do
     add_domain_event(changeset, "login_failed", %{
-      attempts: get_field(changeset, :failed_attempts)
+      attempts: get_field(changeset, :failed_login_attempts)
     })
   end
 

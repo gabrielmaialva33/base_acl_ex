@@ -43,6 +43,11 @@ defmodule BaseAclExWeb.Router do
     get "/auth/me", AuthController, :me
     get "/auth/verify", AuthController, :verify
 
+    # Token management routes
+    get "/auth/devices", AuthController, :devices
+    delete "/auth/devices/:device_id", AuthController, :revoke_device
+    get "/auth/stats", AuthController, :token_stats
+
     # User management routes
     resources "/users", UserController, only: [:index, :show, :update, :delete] do
       get "/permissions", UserController, :permissions, as: :permissions

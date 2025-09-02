@@ -18,7 +18,7 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
     with {:ok, user} <- find_user_by_email(command.email),
          :ok <- verify_password(command.password, user.password_hash),
          :ok <- check_account_status(user),
-         {:ok, tokens} <- generate_tokens(user),
+         {:ok, tokens} <- generate_tokens(user, command),
          :ok <- warm_permission_cache(user),
          :ok <- record_login(user, command) do
       {:ok,
@@ -52,7 +52,7 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
       user.deleted_at != nil ->
         {:error, :account_deleted}
 
-      user.locked_at != nil ->
+      user.locked_until != nil ->
         {:error, :account_locked}
 
       user.email_verified_at == nil ->
@@ -63,8 +63,20 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
     end
   end
 
-  defp generate_tokens(user) do
-    GuardianImpl.generate_tokens(user)
+  defp generate_tokens(user, command \\ nil) do
+    if command do
+      opts = [
+        ip_address: command.ip_address,
+        user_agent: command.user_agent,
+        remember_me: Map.get(command, :remember_me, false),
+        device_id: generate_device_id(command),
+        device_name: parse_device_name(command.user_agent)
+      ]
+
+      GuardianImpl.generate_tokens_with_metadata(user, opts)
+    else
+      GuardianImpl.generate_tokens(user)
+    end
   end
 
   defp warm_permission_cache(user) do
@@ -107,4 +119,32 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
       }
     }
   end
+
+  # Helper functions for device tracking
+
+  defp generate_device_id(command) do
+    # Generate a deterministic device ID based on user agent and IP
+    # This helps identify unique devices for token management
+    data = "#{command.user_agent}:#{command.ip_address}"
+
+    :crypto.hash(:sha256, data)
+    |> Base.encode16(case: :lower)
+    |> String.slice(0, 16)
+  end
+
+  defp parse_device_name(user_agent) when is_binary(user_agent) do
+    cond do
+      String.contains?(user_agent, "Mobile") -> "Mobile Device"
+      String.contains?(user_agent, "iPhone") -> "iPhone"
+      String.contains?(user_agent, "Android") -> "Android Device"
+      String.contains?(user_agent, "iPad") -> "iPad"
+      String.contains?(user_agent, "Chrome") -> "Chrome Browser"
+      String.contains?(user_agent, "Firefox") -> "Firefox Browser"
+      String.contains?(user_agent, "Safari") -> "Safari Browser"
+      String.contains?(user_agent, "Edge") -> "Edge Browser"
+      true -> "Unknown Device"
+    end
+  end
+
+  defp parse_device_name(_), do: "Unknown Device"
 end

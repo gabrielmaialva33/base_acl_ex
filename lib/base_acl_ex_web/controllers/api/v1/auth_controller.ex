@@ -9,6 +9,7 @@ defmodule BaseAclExWeb.Api.V1.AuthController do
   alias BaseAclEx.Accounts.Application.Commands.{AuthenticateUserCommand, RegisterUserCommand}
   alias BaseAclEx.Accounts.Application.Handlers.{AuthenticateUserHandler, RegisterUserHandler}
   alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
+  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
 
   action_fallback BaseAclExWeb.FallbackController
 
@@ -61,6 +62,16 @@ defmodule BaseAclExWeb.Api.V1.AuthController do
   @doc """
   Logout user and revoke tokens.
   """
+  def logout(conn, %{"all_devices" => true}) do
+    user = Guardian.Plug.current_resource(conn)
+
+    with {:ok, result} <- GuardianImpl.revoke_all_user_tokens(user.id, user.id, "logout_all") do
+      conn
+      |> put_status(:ok)
+      |> render(:logout_all, result: result)
+    end
+  end
+
   def logout(conn, _params) do
     token = Guardian.Plug.current_token(conn)
 
@@ -111,5 +122,44 @@ defmodule BaseAclExWeb.Api.V1.AuthController do
     conn
     |> get_req_header("user-agent")
     |> List.first()
+  end
+
+  @doc """
+  Get user devices and active sessions.
+  """
+  def devices(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    with {:ok, devices} <- GuardianImpl.get_user_devices(user.id) do
+      conn
+      |> put_status(:ok)
+      |> render(:devices, devices: devices)
+    end
+  end
+
+  @doc """
+  Revoke tokens for a specific device.
+  """
+  def revoke_device(conn, %{"device_id" => device_id}) do
+    user = Guardian.Plug.current_resource(conn)
+
+    with {:ok, result} <- GuardianImpl.revoke_device_tokens(user.id, device_id, user.id) do
+      conn
+      |> put_status(:ok)
+      |> render(:revoke_device, result: result)
+    end
+  end
+
+  @doc """
+  Get token usage statistics.
+  """
+  def token_stats(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    with {:ok, stats} <- GuardianImpl.get_user_token_stats(user.id) do
+      conn
+      |> put_status(:ok)
+      |> render(:token_stats, stats: stats)
+    end
   end
 end

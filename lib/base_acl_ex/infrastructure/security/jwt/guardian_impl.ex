@@ -8,7 +8,9 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
 
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Identity.Application.Services.PermissionCache
-  alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclEx.Repo
+  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
+  alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
 
   @impl Guardian
   def subject_for_token(%User{id: user_id}, _claims) do
@@ -37,10 +39,15 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
   end
 
   @impl Guardian
-  def build_claims(claims, %User{} = user, _opts) do
+  def build_claims(claims, %User{} = user, opts) do
+    # Ensure JTI is always present for token revocation support
+    jti = Map.get(claims, "jti") || Ecto.UUID.generate()
+    token_type = Keyword.get(opts, :token_type, "access")
+
     claims =
       claims
-      |> Map.put("typ", "access")
+      |> Map.put("jti", jti)
+      |> Map.put("typ", token_type)
       |> Map.put("aud", "base_acl_ex")
       |> Map.put("email", user.email)
       |> Map.put("roles", get_user_roles(user))
@@ -159,7 +166,7 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
 
   defp verify_not_revoked(%{"jti" => jti}) do
     # Check if token is revoked in database
-    if token_revoked?(jti) do
+    if TokenStore.token_revoked?(jti) do
       {:error, :token_revoked}
     else
       :ok
@@ -204,64 +211,166 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
   defp maybe_preload_permissions(user, _), do: user
 
   defp store_refresh_token(user, token, claims) do
-    # Store in access_tokens table
-    %{
-      user_id: user.id,
-      token_hash: hash_token(token),
-      token_type: "refresh",
-      expires_at: DateTime.from_unix!(claims["exp"]),
-      metadata: %{
-        jti: claims["jti"],
-        iat: claims["iat"]
-      }
-    }
+    # Store refresh token in database
+    case TokenStore.store_token(user.id, token, claims) do
+      {:ok, _token_record} ->
+        :ok
 
-    # |> AccessToken.changeset()
-    # |> Repo.insert()
-
-    :ok
-  end
-
-  defp verify_refresh_token_valid(_token, _user) do
-    # Verify refresh token is still valid in database
-    :ok
-  end
-
-  defp maybe_rotate_refresh_token(old_token, user) do
-    # Implement refresh token rotation if needed
-    if should_rotate_token?(old_token) do
-      {:ok, new_token, _claims} =
-        encode_and_sign(user, %{},
-          token_type: "refresh",
-          ttl: {7, :days}
-        )
-
-      # Revoke old token
-      mark_token_revoked(old_token, %{})
-
-      new_token
-    else
-      nil
+      {:error, changeset} ->
+        require Logger
+        Logger.error("Failed to store refresh token: #{inspect(changeset.errors)}")
+        # Don't fail token generation if storage fails
+        :ok
     end
   end
 
-  defp should_rotate_token?(_token) do
-    # Implement rotation logic (e.g., based on age or usage count)
-    false
+  defp verify_refresh_token_valid(token, user) do
+    case TokenStore.validate_refresh_token(token, user.id) do
+      {:ok, _token_record} -> :ok
+      {:error, reason} -> {:error, reason}
+    end
   end
 
-  defp mark_token_revoked(_token, _claims) do
-    # Mark token as revoked in database
-    :ok
+  defp maybe_rotate_refresh_token(old_token, user) do
+    # Check if token should be rotated
+    token_hash = hash_token(old_token)
+
+    case TokenStore.get_token_by_hash(token_hash) do
+      %AccessToken{} = token_record ->
+        if AccessToken.should_rotate?(token_record) do
+          # Generate new refresh token
+          {:ok, new_token, new_claims} =
+            encode_and_sign(user, %{},
+              token_type: "refresh",
+              ttl: {7, :days}
+            )
+
+          # Store new token
+          TokenStore.store_token(user.id, new_token, new_claims)
+
+          # Revoke old token
+          TokenStore.revoke_token(old_token, nil, "rotated")
+
+          new_token
+        else
+          nil
+        end
+
+      nil ->
+        # Token not found in database, don't rotate
+        nil
+    end
   end
 
-  defp token_revoked?(_jti) do
-    # Check if token is revoked
-    false
+  # This function is no longer needed as logic moved to AccessToken.should_rotate?/1
+
+  defp mark_token_revoked(token, claims) do
+    reason = Map.get(claims, "revoke_reason", "manual_revocation")
+    revoked_by_id = Map.get(claims, "revoked_by_id")
+
+    case TokenStore.revoke_token(token, revoked_by_id, reason) do
+      {:ok, _token_record} -> :ok
+      # Already revoked or doesn't exist
+      {:error, :token_not_found} -> :ok
+    end
   end
+
+  # This function is replaced by TokenStore.token_revoked?/1
 
   defp hash_token(token) do
     :crypto.hash(:sha256, token)
     |> Base.encode16(case: :lower)
+  end
+
+  @doc """
+  Revokes all tokens for a user (logout from all devices).
+  """
+  def revoke_all_user_tokens(user_id, revoked_by_id \\ nil, reason \\ "logout_all") do
+    {count, _} = TokenStore.revoke_all_user_tokens(user_id, revoked_by_id, reason)
+    {:ok, %{revoked_count: count}}
+  end
+
+  @doc """
+  Revokes tokens for a specific device.
+  """
+  def revoke_device_tokens(user_id, device_id, revoked_by_id \\ nil) do
+    {count, _} = TokenStore.revoke_device_tokens(user_id, device_id, revoked_by_id)
+    {:ok, %{revoked_count: count}}
+  end
+
+  @doc """
+  Gets user's active devices.
+  """
+  def get_user_devices(user_id) do
+    devices = TokenStore.get_user_devices(user_id)
+    {:ok, devices}
+  end
+
+  @doc """
+  Gets user token statistics.
+  """
+  def get_user_token_stats(user_id) do
+    stats = TokenStore.get_user_token_stats(user_id)
+    {:ok, stats}
+  end
+
+  @doc """
+  Enhanced token generation with device tracking and metadata.
+  """
+  def generate_tokens_with_metadata(%User{} = user, opts \\ []) do
+    ip_address = Keyword.get(opts, :ip_address)
+    user_agent = Keyword.get(opts, :user_agent)
+    device_id = Keyword.get(opts, :device_id)
+    device_name = Keyword.get(opts, :device_name)
+    remember_me = Keyword.get(opts, :remember_me, false)
+    scopes = Keyword.get(opts, :scopes, [])
+
+    # Set TTL based on remember_me option
+    access_ttl = {15, :minutes}
+    refresh_ttl = if remember_me, do: {30, :days}, else: {7, :days}
+
+    with {:ok, access_token, access_claims} <-
+           encode_and_sign(user, %{},
+             token_type: "access",
+             ttl: access_ttl
+           ),
+         {:ok, refresh_token, refresh_claims} <-
+           encode_and_sign(user, %{},
+             token_type: "refresh",
+             ttl: refresh_ttl
+           ) do
+      # Store both tokens in database
+      token_opts = [
+        ip_address: ip_address,
+        user_agent: user_agent,
+        device_id: device_id,
+        device_name: device_name,
+        scopes: scopes,
+        metadata: %{
+          remember_me: remember_me,
+          generated_at: DateTime.utc_now()
+        }
+      ]
+
+      # Store access token
+      {:ok, access_record} =
+        TokenStore.store_token(user.id, access_token, access_claims, token_opts)
+
+      # Store refresh token with reference to access token
+      refresh_opts = Keyword.put(token_opts, :refresh_token_id, access_record.id)
+      TokenStore.store_token(user.id, refresh_token, refresh_claims, refresh_opts)
+
+      {:ok,
+       %{
+         access_token: access_token,
+         refresh_token: refresh_token,
+         # 30 min for remember_me, 15 min normal
+         expires_in: if(remember_me, do: 1800, else: 900),
+         token_type: "Bearer",
+         scope: Enum.join(scopes, " "),
+         # 30 days vs 7 days
+         refresh_expires_in: if(remember_me, do: 2_592_000, else: 604_800)
+       }}
+    end
   end
 end

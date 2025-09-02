@@ -28,7 +28,16 @@ defmodule BaseAclEx.Identity.Core.Entities.UserRole do
   end
 
   @required_fields [:user_id, :role_id]
-  @optional_fields [:granted_by_id, :granted_at, :expires_at, :is_active, :scope, :scope_id, :reason, :metadata]
+  @optional_fields [
+    :granted_by_id,
+    :granted_at,
+    :expires_at,
+    :is_active,
+    :scope,
+    :scope_id,
+    :reason,
+    :metadata
+  ]
 
   @doc """
   Creates a changeset for assigning a role to a user.
