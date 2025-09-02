@@ -36,7 +36,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     field :login_count, :integer, default: 0
     field :two_factor_enabled, :boolean, default: false
     field :two_factor_secret, :string
-    
+
     # Preferences
     field :newsletter_opt_in, :boolean, default: false
     field :terms_accepted_at, :utc_datetime
@@ -227,8 +227,16 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   """
   def registration_changeset(%__MODULE__{} = user, attrs) do
     user
-    |> cast(attrs, [:email, :password_hash, :first_name, :last_name, :username, 
-                    :phone_number, :newsletter_opt_in, :terms_accepted_at])
+    |> cast(attrs, [
+      :email,
+      :password_hash,
+      :first_name,
+      :last_name,
+      :username,
+      :phone_number,
+      :newsletter_opt_in,
+      :terms_accepted_at
+    ])
     |> validate_required([:email, :password_hash, :first_name, :last_name])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> unique_constraint(:email)
