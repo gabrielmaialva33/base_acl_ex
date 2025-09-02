@@ -15,10 +15,12 @@ defmodule BaseAclEx.Identity.Core.Entities.UserRole do
     belongs_to :user, BaseAclEx.Accounts.Core.Entities.User
     belongs_to :role, BaseAclEx.Identity.Core.Entities.Role
 
-    field :assigned_by, :binary_id
+    field :granted_by_id, :binary_id
+    field :granted_at, :utc_datetime
     field :expires_at, :utc_datetime
-    field :revoked_at, :utc_datetime
-    field :revoked_by, :binary_id
+    field :is_active, :boolean, default: true
+    field :scope, :string, default: "global"
+    field :scope_id, :binary_id
     field :reason, :string
     field :metadata, :map, default: %{}
 
@@ -26,7 +28,7 @@ defmodule BaseAclEx.Identity.Core.Entities.UserRole do
   end
 
   @required_fields [:user_id, :role_id]
-  @optional_fields [:assigned_by, :expires_at, :reason, :metadata]
+  @optional_fields [:granted_by_id, :granted_at, :expires_at, :is_active, :scope, :scope_id, :reason, :metadata]
 
   @doc """
   Creates a changeset for assigning a role to a user.
@@ -49,8 +51,8 @@ defmodule BaseAclEx.Identity.Core.Entities.UserRole do
   """
   def revoke_changeset(user_role, attrs) do
     user_role
-    |> cast(attrs, [:revoked_at, :revoked_by, :reason])
-    |> validate_required([:revoked_at])
+    |> cast(attrs, [:is_active, :reason])
+    |> put_change(:is_active, false)
   end
 
   defp validate_expiration(changeset) do

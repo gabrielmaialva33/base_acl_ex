@@ -15,16 +15,16 @@ defmodule BaseAclEx.Identity.Core.Entities.RolePermission do
     belongs_to :role, BaseAclEx.Identity.Core.Entities.Role
     belongs_to :permission, BaseAclEx.Identity.Core.Entities.Permission
 
-    field :granted_by, :binary_id
-    field :revoked_at, :utc_datetime
-    field :revoked_by, :binary_id
+    field :granted_by_id, :binary_id
+    field :is_active, :boolean, default: true
+    field :conditions, :map, default: %{}
     field :metadata, :map, default: %{}
 
     timestamps(type: :utc_datetime)
   end
 
   @required_fields [:role_id, :permission_id]
-  @optional_fields [:granted_by, :metadata]
+  @optional_fields [:granted_by_id, :is_active, :conditions, :metadata]
 
   @doc """
   Creates a changeset for assigning a permission to a role.
@@ -46,7 +46,7 @@ defmodule BaseAclEx.Identity.Core.Entities.RolePermission do
   """
   def revoke_changeset(role_permission, attrs) do
     role_permission
-    |> cast(attrs, [:revoked_at, :revoked_by])
-    |> validate_required([:revoked_at])
+    |> cast(attrs, [:is_active])
+    |> put_change(:is_active, false)
   end
 end
