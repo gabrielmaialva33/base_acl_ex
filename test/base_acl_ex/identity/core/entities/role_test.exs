@@ -1,8 +1,8 @@
 defmodule BaseAclEx.Identity.Core.Entities.RoleTest do
   use BaseAclEx.DataCase
 
-  alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.Factory
+  alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.TestSupport.TestHelpers
   import TestHelpers
 

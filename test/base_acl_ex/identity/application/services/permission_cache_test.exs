@@ -2,8 +2,8 @@ defmodule BaseAclEx.Identity.Application.Services.PermissionCacheTest do
   # async: false due to shared ETS table
   use BaseAclEx.DataCase, async: false
 
-  alias BaseAclEx.Identity.Application.Services.PermissionCache
   alias BaseAclEx.Factory
+  alias BaseAclEx.Identity.Application.Services.PermissionCache
   alias BaseAclEx.TestSupport.TestHelpers
   import TestHelpers
 
@@ -427,7 +427,7 @@ defmodule BaseAclEx.Identity.Application.Services.PermissionCacheTest do
     end
 
     test "handles non-string user IDs" do
-      integer_user_id = 12345
+      integer_user_id = 12_345
       permissions = [%{"name" => "posts.read.any", "scope" => "any"}]
 
       {:ok, _} = PermissionCache.set_user_permissions(integer_user_id, permissions)

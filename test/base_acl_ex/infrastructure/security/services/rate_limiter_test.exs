@@ -1,8 +1,8 @@
 defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterTest do
   use ExUnit.Case, async: false
 
-  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
   alias BaseAclEx.Infrastructure.Security.Entities.RateLimit
+  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
 
   @cache_name :rate_limiter_cache
 
@@ -122,7 +122,7 @@ defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterTest do
 
     test "returns empty status for non-existent identifier" do
       status = RateLimiter.get_rate_limit_status("nonexistent", max_requests: 5)
-      assert length(status.requests) == 0
+      assert Enum.empty?(status.requests)
       assert status.max_requests == 5
     end
   end

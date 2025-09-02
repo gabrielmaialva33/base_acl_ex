@@ -8,8 +8,8 @@ defmodule BaseAclEx.TestSupport.AuthHelpers do
   import ExUnit.Assertions
   import Plug.Conn
 
-  alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
   alias BaseAclEx.Factory
+  alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
 
   @doc """
   Creates a JWT token for a user.

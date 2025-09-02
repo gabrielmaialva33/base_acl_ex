@@ -1,9 +1,9 @@
 defmodule BaseAclEx.Infrastructure.Security.Services.TokenStoreTest do
   use BaseAclEx.DataCase
 
-  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
-  alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
   alias BaseAclEx.Factory
+  alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
+  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
 
   describe "store_token/4" do
     test "successfully stores an access token" do
@@ -213,7 +213,7 @@ defmodule BaseAclEx.Infrastructure.Security.Services.TokenStoreTest do
 
       # Verify tokens are revoked
       active_tokens = TokenStore.get_user_active_tokens(user.id)
-      assert length(active_tokens) == 0
+      assert Enum.empty?(active_tokens)
     end
 
     test "doesn't affect other users' tokens" do

@@ -8,8 +8,9 @@ defmodule BaseAclExWeb.Api.V1.RateLimiterController do
 
   use BaseAclExWeb, :controller
 
-  alias BaseAclEx.Infrastructure.Security.Services.RateLimiterManager
+  alias BaseAclEx.Infrastructure.Security.Entities.RateLimit
   alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
+  alias BaseAclEx.Infrastructure.Security.Services.RateLimiterManager
 
   action_fallback BaseAclExWeb.FallbackController
 
@@ -203,14 +204,11 @@ defmodule BaseAclExWeb.Api.V1.RateLimiterController do
     |> json(%{
       data: %{
         identifier: identifier,
-        current_requests:
-          BaseAclEx.Infrastructure.Security.Entities.RateLimit.current_requests(current_status),
+        current_requests: RateLimit.current_requests(current_status),
         max_requests: current_status.max_requests,
-        remaining:
-          BaseAclEx.Infrastructure.Security.Entities.RateLimit.remaining_requests(current_status),
-        exceeded: BaseAclEx.Infrastructure.Security.Entities.RateLimit.exceeded?(current_status),
-        reset_time:
-          BaseAclEx.Infrastructure.Security.Entities.RateLimit.reset_time(current_status),
+        remaining: RateLimit.remaining_requests(current_status),
+        exceeded: RateLimit.exceeded?(current_status),
+        reset_time: RateLimit.reset_time(current_status),
         window_ms: current_status.window_ms
       },
       message: "Rate limit test completed"

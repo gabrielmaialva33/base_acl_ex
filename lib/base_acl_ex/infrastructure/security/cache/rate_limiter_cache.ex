@@ -30,7 +30,7 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
         default: :timer.hours(1),
         lazy: true
       ],
-      # Size limit - LRU eviction when limit reached  
+      # Size limit - LRU eviction when limit reached
       limit: [
         size: limit,
         policy: :lru,
@@ -96,33 +96,29 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
   end
 
   defp perform_cleanup do
-    try do
-      # Force cleanup of expired entries
-      Cachex.purge(@cache_name)
+    # Force cleanup of expired entries
+    Cachex.purge(@cache_name)
 
-      stats = get_stats()
-      Logger.debug("Rate limiter cache cleanup completed", stats)
+    stats = get_stats()
+    Logger.debug("Rate limiter cache cleanup completed", stats)
 
-      # Emit telemetry for monitoring
-      :telemetry.execute(
-        [:base_acl_ex, :rate_limiter, :cache, :cleanup],
-        stats,
-        %{cache_name: @cache_name}
-      )
-    rescue
-      error ->
-        Logger.warning("Rate limiter cache cleanup failed: #{inspect(error)}")
-    end
+    # Emit telemetry for monitoring
+    :telemetry.execute(
+      [:base_acl_ex, :rate_limiter, :cache, :cleanup],
+      stats,
+      %{cache_name: @cache_name}
+    )
+  rescue
+    error ->
+      Logger.warning("Rate limiter cache cleanup failed: #{inspect(error)}")
   end
 
   defp get_memory_usage do
-    try do
-      case Cachex.inspect(@cache_name, :memory) do
-        {:ok, memory} -> memory
-        _ -> 0
-      end
-    rescue
+    case Cachex.inspect(@cache_name, :memory) do
+      {:ok, memory} -> memory
       _ -> 0
     end
+  rescue
+    _ -> 0
   end
 end

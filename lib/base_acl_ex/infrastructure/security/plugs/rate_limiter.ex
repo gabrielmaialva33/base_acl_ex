@@ -27,8 +27,8 @@ defmodule BaseAclEx.Infrastructure.Security.Plugs.RateLimiter do
   import Plug.Conn
   import Phoenix.Controller, only: [json: 2]
 
-  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
   alias BaseAclEx.Infrastructure.Security.Entities.RateLimit
+  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
 
   @presets %{
     auth_limits: [
@@ -40,7 +40,7 @@ defmodule BaseAclEx.Infrastructure.Security.Plugs.RateLimiter do
     ],
     api_limits: [
       max_requests: 1000,
-      # 1 minute  
+      # 1 minute
       window_ms: 60_000,
       strategy: :user,
       bypass_admin: true

@@ -216,7 +216,7 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.PasswordTest do
 
       # 30 days
       updated_30 = Password.set_expiration(password, 30)
-      # 365 days  
+      # 365 days
       updated_365 = Password.set_expiration(password, 365)
 
       assert DateTime.compare(updated_365.expires_at, updated_30.expires_at) == :gt

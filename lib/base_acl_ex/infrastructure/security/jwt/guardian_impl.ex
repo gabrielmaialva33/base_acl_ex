@@ -8,9 +8,9 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
 
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Identity.Application.Services.PermissionCache
-  alias BaseAclEx.Repo
-  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
   alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
+  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
+  alias BaseAclEx.Repo
 
   @impl Guardian
   def subject_for_token(%User{id: user_id}, _claims) do
@@ -73,7 +73,7 @@ defmodule BaseAclEx.Infrastructure.Security.JWT.GuardianImpl do
   Generates both access and refresh tokens for a user.
   """
   def generate_tokens(%User{} = user) do
-    with {:ok, access_token, access_claims} <-
+    with {:ok, access_token, _access_claims} <-
            encode_and_sign(user, %{},
              token_type: "access",
              ttl: {15, :minutes}

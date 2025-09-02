@@ -5,8 +5,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   """
 
   use BaseAclEx.SharedKernel.Entity
-  alias BaseAclEx.Accounts.Core.ValueObjects.{Email, Password}
-  alias BaseAclEx.SharedKernel.DomainEvent
+  # Removed unused aliases - Email, Password, and DomainEvent
 
   @derive {Jason.Encoder, except: [:__meta__, :password]}
 
@@ -22,7 +21,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     field :phone, :string
     field :avatar_url, :string
 
-    # Status  
+    # Status
     field :is_active, :boolean, default: true
     field :is_deleted, :boolean, default: false
     field :deleted_at, :utc_datetime

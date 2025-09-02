@@ -7,9 +7,8 @@ defmodule BaseAclEx.Infrastructure.Security.Services.TokenStore do
   import Ecto.Query
   require Logger
 
-  alias BaseAclEx.Repo
   alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
-  alias BaseAclEx.Accounts.Core.Entities.User
+  alias BaseAclEx.Repo
 
   @hash_algorithm :sha256
 

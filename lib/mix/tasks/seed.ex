@@ -35,9 +35,9 @@ defmodule Mix.Tasks.Seed do
   """
 
   use Mix.Task
-  alias BaseAclEx.Repo
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Identity.Core.Entities.{Role, Permission, RolePermission, UserRole}
+  alias BaseAclEx.Identity.Core.Entities.{Permission, Role, RolePermission, UserRole}
+  alias BaseAclEx.Repo
 
   require Logger
 
@@ -760,49 +760,56 @@ defmodule Mix.Tasks.Seed do
     Logger.info("  Creating #{total_associations} role-permission associations...")
 
     {created, existing, missing} =
-      Enum.reduce(role_permissions, {0, 0, 0}, fn {role_slug, permission_names},
-                                                  {created_count, existing_count, missing_count} ->
+      Enum.reduce(role_permissions, {0, 0, 0}, fn {role_slug, permission_names}, acc ->
         role = Repo.get_by!(Role, slug: role_slug)
-
-        Enum.reduce(
-          permission_names,
-          {created_count, existing_count, missing_count},
-          fn permission_name, {cc, ec, mc} ->
-            permission = Repo.get_by(Permission, name: permission_name)
-
-            if permission do
-              case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
-                nil ->
-                  %RolePermission{}
-                  |> RolePermission.changeset(%{
-                    role_id: role.id,
-                    permission_id: permission.id,
-                    is_active: true,
-                    metadata: %{seeded: true}
-                  })
-                  |> Repo.insert!()
-
-                  Logger.debug("    ✓ Granted #{permission_name} to #{role.name}")
-                  {cc + 1, ec, mc}
-
-                _existing ->
-                  Logger.debug(
-                    "    → Permission #{permission_name} already granted to #{role.name}"
-                  )
-
-                  {cc, ec + 1, mc}
-              end
-            else
-              Logger.warning("    ⚠ Permission not found: #{permission_name}")
-              {cc, ec, mc + 1}
-            end
-          end
-        )
+        grant_permissions_to_role_with_counts(role, permission_names, acc)
       end)
 
     Logger.info(
       "🔗 Role-permission associations completed: #{created} created, #{existing} existing, #{missing} missing"
     )
+  end
+
+  defp grant_permissions_to_role_with_counts(
+         role,
+         permission_names,
+         {created_count, existing_count, missing_count}
+       ) do
+    Enum.reduce(
+      permission_names,
+      {created_count, existing_count, missing_count},
+      fn permission_name, counts ->
+        permission = Repo.get_by(Permission, name: permission_name)
+        process_permission_grant(role, permission, permission_name, counts)
+      end
+    )
+  end
+
+  defp process_permission_grant(_role, nil, permission_name, {cc, ec, mc}) do
+    Logger.warning("    ⚠ Permission not found: #{permission_name}")
+    {cc, ec, mc + 1}
+  end
+
+  defp process_permission_grant(role, permission, permission_name, {cc, ec, mc}) do
+    case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
+      nil ->
+        %RolePermission{}
+        |> RolePermission.changeset(%{
+          role_id: role.id,
+          permission_id: permission.id,
+          is_active: true,
+          metadata: %{seeded: true}
+        })
+        |> Repo.insert!()
+
+        Logger.debug("    ✓ Granted #{permission_name} to #{role.name}")
+        {cc + 1, ec, mc}
+
+      _existing ->
+        Logger.debug("    → Permission #{permission_name} already granted to #{role.name}")
+
+        {cc, ec + 1, mc}
+    end
   end
 
   defp seed_users do

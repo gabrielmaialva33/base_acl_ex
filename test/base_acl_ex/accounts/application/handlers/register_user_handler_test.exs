@@ -4,8 +4,8 @@ defmodule BaseAclEx.Accounts.Application.Handlers.RegisterUserHandlerTest do
   alias BaseAclEx.Accounts.Application.Commands.RegisterUserCommand
   alias BaseAclEx.Accounts.Application.Handlers.RegisterUserHandler
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.Factory
+  alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.TestSupport.TestHelpers
   import TestHelpers
 

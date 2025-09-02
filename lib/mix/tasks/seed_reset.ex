@@ -37,9 +37,9 @@ defmodule Mix.Tasks.SeedReset do
   """
 
   use Mix.Task
-  alias BaseAclEx.Repo
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Identity.Core.Entities.{Role, Permission, RolePermission, UserRole}
+  alias BaseAclEx.Identity.Core.Entities.{Permission, Role, RolePermission, UserRole}
+  alias BaseAclEx.Repo
 
   import Ecto.Query
   require Logger

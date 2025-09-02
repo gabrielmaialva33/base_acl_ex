@@ -104,10 +104,10 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
     issues = []
 
     issues =
-      if not cache_healthy do
-        ["Cache not responding" | issues]
-      else
+      if cache_healthy do
         issues
+      else
+        ["Cache not responding" | issues]
       end
 
     issues =
@@ -162,7 +162,7 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
     end
   end
 
-  defp get_counter_value(type) do
+  defp get_counter_value(_type) do
     # This would integrate with your metrics system (Prometheus, StatsD, etc.)
     # For now return 0 as placeholder
     0
@@ -207,14 +207,12 @@ defmodule BaseAclEx.Infrastructure.Security.Telemetry.RateLimiterTelemetry do
   end
 
   defp cache_health_check do
-    try do
-      # Test cache by checking if it's running
-      case Cachex.size(:rate_limiter_cache) do
-        {:ok, _} -> true
-        _ -> false
-      end
-    rescue
+    # Test cache by checking if it's running
+    case Cachex.size(:rate_limiter_cache) do
+      {:ok, _} -> true
       _ -> false
     end
+  rescue
+    _ -> false
   end
 end

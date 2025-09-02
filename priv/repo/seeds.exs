@@ -674,34 +674,40 @@ defmodule BaseAclEx.Seeds do
 
     Enum.each(role_permissions, fn {role_slug, permission_names} ->
       role = Repo.get_by!(Role, slug: role_slug)
-
-      Enum.each(permission_names, fn permission_name ->
-        permission = Repo.get_by(Permission, name: permission_name)
-
-        if permission do
-          case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
-            nil ->
-              %RolePermission{}
-              |> RolePermission.changeset(%{
-                role_id: role.id,
-                permission_id: permission.id,
-                is_active: true,
-                metadata: %{seeded: true}
-              })
-              |> Repo.insert!()
-
-              Logger.debug("  ✓ Granted #{permission_name} to #{role.name}")
-
-            _existing ->
-              Logger.debug("  → Permission #{permission_name} already granted to #{role.name}")
-          end
-        else
-          Logger.warning("  ⚠ Permission not found: #{permission_name}")
-        end
-      end)
+      grant_permissions_to_role(role, permission_names)
     end)
 
     Logger.info("🔗 Role-permission associations completed")
+  end
+
+  defp grant_permissions_to_role(role, permission_names) do
+    Enum.each(permission_names, fn permission_name ->
+      permission = Repo.get_by(Permission, name: permission_name)
+      grant_permission_if_exists(role, permission, permission_name)
+    end)
+  end
+
+  defp grant_permission_if_exists(role, nil, permission_name) do
+    Logger.warning("  ⚠ Permission not found: #{permission_name}")
+  end
+
+  defp grant_permission_if_exists(role, permission, permission_name) do
+    case Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
+      nil ->
+        %RolePermission{}
+        |> RolePermission.changeset(%{
+          role_id: role.id,
+          permission_id: permission.id,
+          is_active: true,
+          metadata: %{seeded: true}
+        })
+        |> Repo.insert!()
+
+        Logger.debug("  ✓ Granted #{permission_name} to #{role.name}")
+
+      _existing ->
+        Logger.debug("  → Permission #{permission_name} already granted to #{role.name}")
+    end
   end
 
   defp seed_users do

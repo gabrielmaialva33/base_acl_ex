@@ -6,11 +6,11 @@ defmodule BaseAclEx.Infrastructure.Security.Services.TokenRotationService do
 
   require Logger
 
-  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
+  alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Security.Entities.AccessToken
   alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
+  alias BaseAclEx.Infrastructure.Security.Services.TokenStore
   alias BaseAclEx.Repo
-  alias BaseAclEx.Accounts.Core.Entities.User
 
   @doc """
   Performs automatic token rotation for eligible tokens.

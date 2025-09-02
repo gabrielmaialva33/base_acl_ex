@@ -6,8 +6,8 @@ defmodule BaseAclEx.Infrastructure.Security.Services.RateLimiterManager do
   including statistics, cache management, and allowlist operations.
   """
 
-  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
   alias BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache
+  alias BaseAclEx.Infrastructure.Security.Services.RateLimiter
 
   @cache_name :rate_limiter_cache
 

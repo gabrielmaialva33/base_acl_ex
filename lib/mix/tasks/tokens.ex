@@ -13,9 +13,9 @@ defmodule Mix.Tasks.Tokens do
 
   use Mix.Task
 
-  alias BaseAclEx.Infrastructure.Security.Services.{TokenStore, TokenRotationService}
-  alias BaseAclEx.Infrastructure.Security.Workers.TokenCleanupWorker
   alias BaseAclEx.Accounts.Core.Entities.User
+  alias BaseAclEx.Infrastructure.Security.Services.{TokenRotationService, TokenStore}
+  alias BaseAclEx.Infrastructure.Security.Workers.TokenCleanupWorker
   alias BaseAclEx.Repo
 
   @requirements ["app.start"]
