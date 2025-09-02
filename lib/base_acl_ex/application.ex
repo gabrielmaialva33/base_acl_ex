@@ -12,6 +12,10 @@ defmodule BaseAclEx.Application do
       BaseAclEx.Repo,
       {DNSCluster, query: Application.get_env(:base_acl_ex, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BaseAclEx.PubSub},
+      # CQRS and Permission services (order matters for dependencies)
+      BaseAclEx.Identity.Application.Services.PermissionCache,
+      BaseAclEx.SharedKernel.CQRS.CommandBus,
+      BaseAclEx.SharedKernel.CQRS.QueryBus,
       # Start a worker by calling: BaseAclEx.Worker.start_link(arg)
       # {BaseAclEx.Worker, arg},
       # Start to serve requests, typically the last entry

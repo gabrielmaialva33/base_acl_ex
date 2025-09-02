@@ -16,8 +16,16 @@ defmodule BaseAclEx.SharedKernel.Entity do
 
       @type t :: %__MODULE__{}
 
+      # We need to define these functions after the schema is defined
+      # Using @before_compile to ensure the struct is available
+      @before_compile BaseAclEx.SharedKernel.Entity
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote do
       # Default equality based on ID
-      def equals?(%__MODULE__{id: id1}, %__MODULE__{id: id2})
+      def equals?(%{__struct__: __MODULE__, id: id1}, %{__struct__: __MODULE__, id: id2})
           when is_binary(id1) and is_binary(id2) do
         id1 == id2
       end
@@ -25,11 +33,11 @@ defmodule BaseAclEx.SharedKernel.Entity do
       def equals?(_, _), do: false
 
       # Check if entity is persisted
-      def persisted?(%__MODULE__{id: nil}), do: false
-      def persisted?(%__MODULE__{id: _}), do: true
+      def persisted?(%{__struct__: __MODULE__, id: nil}), do: false
+      def persisted?(%{__struct__: __MODULE__, id: _}), do: true
 
       # Get entity identity
-      def identity(%__MODULE__{id: id}), do: id
+      def identity(%{__struct__: __MODULE__, id: id}), do: id
 
       defoverridable equals?: 2, persisted?: 1, identity: 1
     end

@@ -65,7 +65,14 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: secret_key_base,
+    live_view: [
+      signing_salt:
+        System.get_env("LIVEVIEW_SIGNING_SALT") ||
+          raise(
+            "environment variable LIVEVIEW_SIGNING_SALT is missing. Generate one with: mix phx.gen.secret 32"
+          )
+    ]
 
   # ## SSL Support
   #
@@ -99,21 +106,48 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
+  # Guardian JWT configuration for production
+  guardian_secret_key =
+    System.get_env("GUARDIAN_SECRET_KEY") ||
+      raise """
+      environment variable GUARDIAN_SECRET_KEY is missing.
+      You can generate one by running: mix guardian.gen.secret
+      """
+
+  config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
+    secret_key: guardian_secret_key,
+    ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes}
+
+  # Configure logger level
+  config :logger, level: String.to_existing_atom(System.get_env("LOG_LEVEL") || "info")
+
   # ## Configuring the mailer
   #
-  # In production you need to configure the mailer to use a different adapter.
-  # Here is an example configuration for Mailgun:
-  #
-  #     config :base_acl_ex, BaseAclEx.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
-  # and Finch out-of-the-box. This configuration is typically done at
-  # compile-time in your config/prod.exs:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
-  #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # Configure mailer based on available environment variables
+  cond do
+    System.get_env("MAILGUN_API_KEY") ->
+      config :base_acl_ex, BaseAclEx.Mailer,
+        adapter: Swoosh.Adapters.Mailgun,
+        api_key: System.get_env("MAILGUN_API_KEY"),
+        domain: System.get_env("MAILGUN_DOMAIN")
+
+    System.get_env("SENDGRID_API_KEY") ->
+      config :base_acl_ex, BaseAclEx.Mailer,
+        adapter: Swoosh.Adapters.Sendgrid,
+        api_key: System.get_env("SENDGRID_API_KEY")
+
+    System.get_env("SMTP_HOST") ->
+      config :base_acl_ex, BaseAclEx.Mailer,
+        adapter: Swoosh.Adapters.SMTP,
+        relay: System.get_env("SMTP_HOST"),
+        port: String.to_integer(System.get_env("SMTP_PORT") || "587"),
+        username: System.get_env("SMTP_USERNAME"),
+        password: System.get_env("SMTP_PASSWORD"),
+        tls: System.get_env("SMTP_TLS", "true") == "true",
+        ssl: System.get_env("SMTP_SSL", "false") == "true"
+
+    true ->
+      # Default to local adapter if no email service is configured
+      config :base_acl_ex, BaseAclEx.Mailer, adapter: Swoosh.Adapters.Local
+  end
 end

@@ -18,8 +18,8 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
   }
 
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Authorization.Core.Entities.Role
-  alias BaseAclEx.Authorization.Core.Entities.UserRole
+  alias BaseAclEx.Identity.Core.Entities.Role
+  alias BaseAclEx.Identity.Core.Entities.UserRole
   alias BaseAclEx.Infrastructure.Persistence.Repo
 
   action_fallback BaseAclExWeb.FallbackController

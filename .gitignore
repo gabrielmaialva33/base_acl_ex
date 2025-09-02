@@ -41,3 +41,13 @@ npm-debug.log
 
 # Claude
 /.claude/
+
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.*.local
+.envrc
+
+# IDE and Editor files
+.vscode/
+.vs/

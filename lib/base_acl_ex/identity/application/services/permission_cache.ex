@@ -6,6 +6,7 @@ defmodule BaseAclEx.Identity.Application.Services.PermissionCache do
 
   use GenServer
   require Logger
+  import Cachex.Spec
 
   @cache_name :permission_cache
   @ets_table :permission_ets
@@ -195,10 +196,12 @@ defmodule BaseAclEx.Identity.Application.Services.PermissionCache do
     case Cachex.start_link(@cache_name,
            stats: true,
            transactions: true,
-           expiration: [
-             default: @user_permission_ttl,
-             interval: :timer.minutes(5)
-           ]
+           expiration:
+             expiration(
+               default: @user_permission_ttl,
+               interval: :timer.minutes(5),
+               lazy: true
+             )
          ) do
       {:ok, _} ->
         Logger.info("Permission cache started successfully")

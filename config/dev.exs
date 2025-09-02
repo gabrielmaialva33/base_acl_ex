@@ -2,13 +2,14 @@ import Config
 
 # Configure your database
 config :base_acl_ex, BaseAclEx.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "base_acl_ex_dev",
+  username: System.get_env("DB_USERNAME", "postgres"),
+  password: System.get_env("DB_PASSWORD", "postgres"),
+  hostname: System.get_env("DB_HOSTNAME", "localhost"),
+  database: System.get_env("DB_DATABASE", "base_acl_ex_dev"),
+  port: System.get_env("DB_PORT", "5432") |> String.to_integer(),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: System.get_env("POOL_SIZE", "10") |> String.to_integer()
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -19,11 +20,14 @@ config :base_acl_ex, BaseAclEx.Repo,
 config :base_acl_ex, BaseAclExWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
+  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PHX_PORT") || "4000")],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "z9qPGW1WsEo0tgmK8JvFPq0BmMBWQCI3UyncPRM9Z2ozy9TZkzUNprV7Lyo+3cks",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      "z9qPGW1WsEo0tgmK8JvFPq0BmMBWQCI3UyncPRM9Z2ozy9TZkzUNprV7Lyo+3cks",
+  live_view: [signing_salt: System.get_env("LIVEVIEW_SIGNING_SALT") || "TKq9698w"],
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:base_acl_ex, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:base_acl_ex, ~w(--watch)]}
@@ -87,6 +91,9 @@ config :phoenix_live_view,
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-# Guardian secret key for development
+# Guardian secret key for development - use environment variable or fallback
 config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
-  secret_key: "vErY_sEcReT_kEy_fOr_dEvElOpMeNt_OnLy_pLeAsE_cHaNgE_iN_pRoDuCtIoN"
+  secret_key:
+    System.get_env("GUARDIAN_SECRET_KEY") ||
+      "vErY_sEcReT_kEy_fOr_dEvElOpMeNt_OnLy_pLeAsE_cHaNgE_iN_pRoDuCtIoN",
+  ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes}

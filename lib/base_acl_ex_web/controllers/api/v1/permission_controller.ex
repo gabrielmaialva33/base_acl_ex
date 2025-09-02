@@ -7,8 +7,8 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
   use BaseAclExWeb, :controller
   import Ecto.Query
 
-  alias BaseAclEx.Authorization.Core.Entities.{Permission, RolePermission}
-  alias BaseAclEx.Authorization.Core.Entities.Role
+  alias BaseAclEx.Identity.Core.Entities.{Permission, RolePermission}
+  alias BaseAclEx.Identity.Core.Entities.Role
   alias BaseAclEx.Infrastructure.Persistence.Repo
 
   action_fallback BaseAclExWeb.FallbackController

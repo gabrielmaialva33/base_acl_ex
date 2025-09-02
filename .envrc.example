@@ -1,0 +1,32 @@
+# .envrc.example
+# 
+# This file is for use with direnv (https://direnv.net/).
+# Copy this file to .envrc and configure your environment.
+#
+# To use:
+# 1. cp .envrc.example .envrc
+# 2. Edit .envrc with your values
+# 3. Run: direnv allow
+#
+# Direnv will automatically load these variables when you cd into the project directory.
+
+# Load .env file if it exists
+dotenv_if_exists
+
+# Optional: Set additional development environment variables
+export MIX_ENV=dev
+export ELIXIR_ERL_OPTIONS="+fnu"
+
+# Optional: Development-specific overrides
+# export PHX_PORT=4001
+# export LOG_LEVEL=debug
+
+# Optional: Enable some development features
+# export DEV_ROUTES=true
+# export ENABLE_2FA=false
+
+# Uncomment to set database-specific environment variables
+# export DB_USERNAME=postgres
+# export DB_PASSWORD=postgres
+# export DB_HOSTNAME=localhost
+# export DB_DATABASE=base_acl_ex_dev

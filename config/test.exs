@@ -6,10 +6,12 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :base_acl_ex, BaseAclEx.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "base_acl_ex_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: System.get_env("DB_USERNAME", "postgres"),
+  password: System.get_env("DB_PASSWORD", "postgres"),
+  hostname: System.get_env("DB_HOSTNAME", "localhost"),
+  database:
+    System.get_env("DB_DATABASE", "base_acl_ex_test") <> "#{System.get_env("MIX_TEST_PARTITION")}",
+  port: System.get_env("DB_PORT", "5432") |> String.to_integer(),
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -17,7 +19,10 @@ config :base_acl_ex, BaseAclEx.Repo,
 # you can enable the server option below.
 config :base_acl_ex, BaseAclExWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "LAKR3//wp8TvSbRNmhCAMhs5r950TKaebPSxd+204vNy//rCKD0BUuIgBmkYeJqM",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      "LAKR3//wp8TvSbRNmhCAMhs5r950TKaebPSxd+204vNy//rCKD0BUuIgBmkYeJqM",
+  live_view: [signing_salt: System.get_env("LIVEVIEW_SIGNING_SALT") || "test_salt"],
   server: false
 
 # In test we don't send emails
@@ -35,3 +40,9 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+# Guardian test configuration
+config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
+  secret_key:
+    System.get_env("GUARDIAN_SECRET_KEY") || "test_guardian_secret_key_change_in_production",
+  ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes}

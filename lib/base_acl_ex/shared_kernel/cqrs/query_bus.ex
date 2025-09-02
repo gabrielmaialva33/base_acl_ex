@@ -6,6 +6,7 @@ defmodule BaseAclEx.SharedKernel.CQRS.QueryBus do
 
   use GenServer
   require Logger
+  import Cachex.Spec
 
   # Client API
 
@@ -48,10 +49,12 @@ defmodule BaseAclEx.SharedKernel.CQRS.QueryBus do
     # Start query cache if not already started
     Cachex.start_link(:query_cache,
       stats: true,
-      expiration: [
-        default: :timer.minutes(5),
-        interval: :timer.minutes(1)
-      ]
+      expiration:
+        expiration(
+          default: :timer.minutes(5),
+          interval: :timer.minutes(1),
+          lazy: true
+        )
     )
 
     state = %{

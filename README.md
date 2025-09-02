@@ -400,30 +400,78 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+**IMPORTANT**: Never commit sensitive environment variables to version control.
 
-```env
-# Database Configuration
-DATABASE_URL=ecto://postgres:postgres@localhost/base_acl_ex_dev
-DATABASE_POOL_SIZE=10
+1. **Copy the example environment file**:
+   ```bash
+   cp .env.example .env
+   ```
 
-# Redis Configuration (optional)
-REDIS_URL=redis://localhost:6379
+2. **Generate required secrets**:
+   ```bash
+   # Generate Phoenix secret key base
+   mix phx.gen.secret
+   
+   # Generate Guardian JWT secret (requires guardian dependency)
+   mix guardian.gen.secret
+   
+   # Generate LiveView signing salt (32 characters)
+   mix phx.gen.secret 32
+   ```
 
-# Guardian Secret Key
-GUARDIAN_SECRET_KEY=your_secret_key_here
+3. **Configure your `.env` file** with the generated secrets:
+   ```env
+   # Required: Phoenix Configuration
+   SECRET_KEY_BASE=your_generated_secret_key_base_here
+   LIVEVIEW_SIGNING_SALT=your_generated_liveview_salt_here
+   PHX_HOST=localhost
+   PHX_PORT=4000
 
-# Application
-PHX_HOST=localhost
-PHX_PORT=4000
-SECRET_KEY_BASE=your_secret_key_base_here
+   # Required: Guardian JWT Configuration
+   GUARDIAN_SECRET_KEY=your_generated_guardian_secret_here
+   JWT_ACCESS_TOKEN_TTL_MINUTES=15
+   JWT_REFRESH_TOKEN_TTL_DAYS=7
 
-# Email Configuration
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your_email@gmail.com
-SMTP_PASSWORD=your_password
-```
+   # Optional: Database Configuration (uses defaults if not set)
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_HOSTNAME=localhost
+   DB_DATABASE=base_acl_ex_dev
+   DB_PORT=5432
+   POOL_SIZE=10
+
+   # Optional: Email Configuration (uses local adapter if not set)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USERNAME=your_email@gmail.com
+   SMTP_PASSWORD=your_app_password
+   ```
+
+4. **Load environment variables** (if using direnv or similar):
+   ```bash
+   # Option 1: Using direnv (recommended for development)
+   echo "dotenv" > .envrc
+   direnv allow
+   
+   # Option 2: Source manually before running commands
+   export $(cat .env | xargs)
+   ```
+
+### Production Environment Variables
+
+For production deployment, ensure these environment variables are set:
+
+**Required**:
+- `SECRET_KEY_BASE` - Phoenix secret key base
+- `GUARDIAN_SECRET_KEY` - JWT signing key
+- `LIVEVIEW_SIGNING_SALT` - LiveView signing salt
+- `DATABASE_URL` - PostgreSQL connection URL
+
+**Recommended**:
+- `PHX_HOST` - Your domain name
+- `PORT` - Application port (default: 4000)
+- `LOG_LEVEL` - Logging level (info, warning, error)
+- Email service configuration (SMTP_*, MAILGUN_*, or SENDGRID_*)
 
 ### Database Migrations
 

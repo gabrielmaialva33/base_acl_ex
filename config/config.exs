@@ -20,7 +20,8 @@ config :base_acl_ex, BaseAclExWeb.Endpoint,
     layout: false
   ],
   pubsub_server: BaseAclEx.PubSub,
-  live_view: [signing_salt: "TKq9698w"]
+  # LiveView signing salt will be configured in runtime.exs from environment variables
+  live_view: []
 
 # Configures the mailer
 #
@@ -61,11 +62,13 @@ config :logger, :default_formatter,
 config :phoenix, :json_library, Jason
 
 # Guardian configuration for JWT authentication
+# Secret key will be configured in runtime.exs from environment variables
 config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
   issuer: "base_acl_ex",
-  ttl: {15, :minutes},
   allowed_algos: ["HS256", "RS256"],
   verify_issuer: true
+
+# ttl and secret_key will be configured in environment-specific files
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
