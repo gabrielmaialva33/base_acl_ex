@@ -48,30 +48,18 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserByIdHandler do
   end
 
   defp format_user_response(user, query) do
-    response = %{
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      phone_number: user.phone_number,
-      avatar_url: user.avatar_url,
-      email_verified: user.email_verified_at != nil,
-      two_factor_enabled: user.two_factor_enabled,
-      created_at: user.inserted_at,
-      updated_at: user.updated_at
-    }
+    response = UserFormatter.format_user(user)
 
     response =
       if query.include_roles do
-        Map.put(response, :roles, format_roles(Map.get(user, :roles, [])))
+        Map.put(response, :roles, UserFormatter.format_roles(Map.get(user, :roles, [])))
       else
         response
       end
 
     response =
       if query.include_permissions do
-        Map.put(response, :permissions, format_permissions(Map.get(user, :permissions, [])))
+        Map.put(response, :permissions, UserFormatter.format_permissions(Map.get(user, :permissions, [])))
       else
         response
       end
@@ -79,26 +67,4 @@ defmodule BaseAclEx.Accounts.Application.Handlers.GetUserByIdHandler do
     response
   end
 
-  defp format_roles(roles) do
-    Enum.map(roles, fn role ->
-      %{
-        id: role.id,
-        name: role.name,
-        slug: role.slug,
-        description: role.description
-      }
-    end)
-  end
-
-  defp format_permissions(permissions) do
-    Enum.map(permissions, fn permission ->
-      %{
-        id: permission.id,
-        name: permission.name,
-        resource: permission.resource,
-        action: permission.action,
-        context: permission.context
-      }
-    end)
-  end
 end
