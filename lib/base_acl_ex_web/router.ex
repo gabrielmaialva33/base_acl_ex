@@ -56,7 +56,8 @@ defmodule BaseAclExWeb.Router do
     end
 
     # Permission management routes
-    resources "/permissions", PermissionController, only: [:index, :show, :create, :update, :delete] do
+    resources "/permissions", PermissionController,
+      only: [:index, :show, :create, :update, :delete] do
       get "/roles", PermissionController, :roles, as: :roles
       post "/roles/:role_id", PermissionController, :assign_role, as: :assign_role
       delete "/roles/:role_id", PermissionController, :remove_role, as: :remove_role

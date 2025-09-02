@@ -207,7 +207,8 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
 
     query =
       from(rp in RolePermission,
-        join: r in Role, on: rp.role_id == r.id,
+        join: r in Role,
+        on: rp.role_id == r.id,
         where: rp.permission_id == ^permission_id and is_nil(rp.revoked_at),
         select: %{
           role: r,
@@ -233,7 +234,9 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
     if has_admin_permission?(current_user) do
       existing =
         from(rp in RolePermission,
-          where: rp.permission_id == ^permission_id and rp.role_id == ^role_id and is_nil(rp.revoked_at)
+          where:
+            rp.permission_id == ^permission_id and rp.role_id == ^role_id and
+              is_nil(rp.revoked_at)
         )
         |> Repo.one()
 
@@ -280,7 +283,9 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
     if has_admin_permission?(current_user) do
       role_permission =
         from(rp in RolePermission,
-          where: rp.permission_id == ^permission_id and rp.role_id == ^role_id and is_nil(rp.revoked_at)
+          where:
+            rp.permission_id == ^permission_id and rp.role_id == ^role_id and
+              is_nil(rp.revoked_at)
         )
         |> Repo.one()
 
@@ -323,7 +328,8 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
     # Check if user has admin role or permission
     query =
       from(ur in BaseAclEx.Authorization.Core.Entities.UserRole,
-        join: r in Role, on: ur.role_id == r.id,
+        join: r in Role,
+        on: ur.role_id == r.id,
         where: ur.user_id == ^user.id and is_nil(ur.revoked_at),
         where: r.slug in ["admin", "super-admin"],
         limit: 1

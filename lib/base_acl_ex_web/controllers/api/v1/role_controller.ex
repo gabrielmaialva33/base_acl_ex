@@ -7,8 +7,16 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
   use BaseAclExWeb, :controller
   import Ecto.Query
 
-  alias BaseAclEx.Accounts.Application.Commands.{AssignRoleToUserCommand, RemoveRoleFromUserCommand}
-  alias BaseAclEx.Accounts.Application.Handlers.{AssignRoleToUserHandler, RemoveRoleFromUserHandler}
+  alias BaseAclEx.Accounts.Application.Commands.{
+    AssignRoleToUserCommand,
+    RemoveRoleFromUserCommand
+  }
+
+  alias BaseAclEx.Accounts.Application.Handlers.{
+    AssignRoleToUserHandler,
+    RemoveRoleFromUserHandler
+  }
+
   alias BaseAclEx.Authorization.Core.Entities.Role
   alias BaseAclEx.Authorization.Core.Entities.UserRole
   alias BaseAclEx.Accounts.Core.Entities.User
@@ -186,7 +194,8 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
 
     query =
       from(ur in UserRole,
-        join: u in User, on: ur.user_id == u.id,
+        join: u in User,
+        on: ur.user_id == u.id,
         where: ur.role_id == ^role_id and is_nil(ur.revoked_at),
         select: %{
           user: u,
@@ -210,14 +219,15 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      command = AssignRoleToUserCommand.new(%{
-        user_id: user_id,
-        role_id: role_id,
-        assigned_by: current_user.id,
-        expires_at: Map.get(params, "expires_at"),
-        reason: Map.get(params, "reason"),
-        metadata: Map.get(params, "metadata", %{})
-      })
+      command =
+        AssignRoleToUserCommand.new(%{
+          user_id: user_id,
+          role_id: role_id,
+          assigned_by: current_user.id,
+          expires_at: Map.get(params, "expires_at"),
+          reason: Map.get(params, "reason"),
+          metadata: Map.get(params, "metadata", %{})
+        })
 
       with {:ok, command} <- AssignRoleToUserCommand.validate(command),
            {:ok, _assignment} <- AssignRoleToUserHandler.execute(command) do
@@ -239,12 +249,13 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     current_user = Guardian.Plug.current_resource(conn)
 
     if has_admin_permission?(current_user) do
-      command = RemoveRoleFromUserCommand.new(%{
-        user_id: user_id,
-        role_id: role_id,
-        revoked_by: current_user.id,
-        reason: Map.get(params, "reason")
-      })
+      command =
+        RemoveRoleFromUserCommand.new(%{
+          user_id: user_id,
+          role_id: role_id,
+          revoked_by: current_user.id,
+          reason: Map.get(params, "reason")
+        })
 
       with {:ok, command} <- RemoveRoleFromUserCommand.validate(command),
            {:ok, _} <- RemoveRoleFromUserHandler.execute(command) do
@@ -266,7 +277,8 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     # This would check the actual permissions
     query =
       from(ur in UserRole,
-        join: r in Role, on: ur.role_id == r.id,
+        join: r in Role,
+        on: ur.role_id == r.id,
         where: ur.user_id == ^user.id and is_nil(ur.revoked_at),
         where: r.slug in ["admin", "super-admin"],
         limit: 1

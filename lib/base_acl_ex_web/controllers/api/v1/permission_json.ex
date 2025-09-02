@@ -100,8 +100,8 @@ defmodule BaseAclExWeb.Api.V1.PermissionJSON do
 
   defp permission_data_with_roles(permission) do
     base_data = permission_data(permission)
-    
-    roles = 
+
+    roles =
       case permission.roles do
         %Ecto.Association.NotLoaded{} -> []
         role_list -> Enum.map(role_list, &role_data/1)
