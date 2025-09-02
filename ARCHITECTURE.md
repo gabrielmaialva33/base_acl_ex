@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project follows a **Domain-Driven Design (DDD)** approach with **Bounded Contexts**, implementing principles from **Clean Architecture** and **Hexagonal Architecture** to create a scalable, maintainable, and testable enterprise-grade application.
+This project follows a **Domain-Driven Design (DDD)** approach with **Bounded Contexts**, implementing principles from *
+*Clean Architecture** and **Hexagonal Architecture** to create a scalable, maintainable, and testable enterprise-grade
+application.
 
 ## 🎯 Core Principles
 
@@ -179,16 +181,19 @@ graph TD
 ## 🎭 Bounded Contexts
 
 ### 1. Accounts Context
+
 - **Responsibility**: User lifecycle management
 - **Key Concepts**: User, Profile, Authentication
 - **Dependencies**: None (root context)
 
 ### 2. Identity Context
+
 - **Responsibility**: Authorization and access control
 - **Key Concepts**: Role, Permission, Policy
 - **Dependencies**: Accounts (for User reference)
 
 ### 3. Audit Context
+
 - **Responsibility**: Activity tracking and compliance
 - **Key Concepts**: AuditLog, Activity, Compliance
 - **Dependencies**: Accounts, Identity (for context)
@@ -196,6 +201,7 @@ graph TD
 ## 🔧 Key Patterns
 
 ### Domain Events
+
 ```elixir
 defmodule BaseAclEx.SharedKernel.DomainEvent do
   @callback aggregate_id() :: String.t()
@@ -206,6 +212,7 @@ end
 ```
 
 ### Repository Pattern
+
 ```elixir
 defmodule BaseAclEx.Accounts.Core.Ports.UserRepository do
   @callback find(id :: String.t()) :: {:ok, User.t()} | {:error, :not_found}
@@ -215,6 +222,7 @@ end
 ```
 
 ### Command/Query Separation
+
 ```elixir
 # Command
 defmodule BaseAclEx.Accounts.Application.Commands.CreateUser do

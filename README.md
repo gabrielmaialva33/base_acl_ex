@@ -37,30 +37,42 @@
 
 ## :bookmark: About
 
-**BaseAclEx** is a comprehensive, production-ready Access Control List (ACL) system built with Phoenix Framework and Elixir. It provides a robust foundation for implementing fine-grained permission management in enterprise applications using Domain-Driven Design (DDD) principles, Command Query Responsibility Segregation (CQRS) pattern, and event sourcing capabilities.
+**BaseAclEx** is a comprehensive, production-ready Access Control List (ACL) system built with Phoenix Framework and
+Elixir. It provides a robust foundation for implementing fine-grained permission management in enterprise applications
+using Domain-Driven Design (DDD) principles, Command Query Responsibility Segregation (CQRS) pattern, and event sourcing
+capabilities.
 
-The system is designed to handle complex authorization scenarios with high performance, featuring role-based access control (RBAC), hierarchical permissions, permission inheritance, and real-time permission updates through WebSocket support.
+The system is designed to handle complex authorization scenarios with high performance, featuring role-based access
+control (RBAC), hierarchical permissions, permission inheritance, and real-time permission updates through WebSocket
+support.
 
 ## 🎯 Project Vision
 
-Provide a scalable, maintainable, and secure authorization system that can be easily integrated into any Phoenix application. The architecture supports multi-tenancy, permission delegation, audit trails, and compliance with enterprise security standards while maintaining the simplicity and elegance of Elixir.
+Provide a scalable, maintainable, and secure authorization system that can be easily integrated into any Phoenix
+application. The architecture supports multi-tenancy, permission delegation, audit trails, and compliance with
+enterprise security standards while maintaining the simplicity and elegance of Elixir.
 
 <br>
 
 ## :rocket: Technologies
 
 ### Core Stack
-- **[Elixir](https://elixir-lang.org/)** 1.15+ - A dynamic, functional language designed for building maintainable and scalable applications
-- **[Phoenix Framework](https://www.phoenixframework.org/)** 1.8.1 - A productive web framework that does not compromise speed or maintainability
+
+- **[Elixir](https://elixir-lang.org/)** 1.15+ - A dynamic, functional language designed for building maintainable and
+  scalable applications
+- **[Phoenix Framework](https://www.phoenixframework.org/)** 1.8.1 - A productive web framework that does not compromise
+  speed or maintainability
 - **[PostgreSQL](https://www.postgresql.org/)** 14+ - The world's most advanced open source relational database
 - **[Ecto](https://hexdocs.pm/ecto/Ecto.html)** - Database wrapper and query generator for Elixir
 
 ### Authentication & Security
+
 - **[Guardian](https://github.com/ueberauth/guardian)** - JWT authentication library for Elixir
 - **[Argon2](https://github.com/riverrun/argon2_elixir)** - Password hashing library
 - **[Bodyguard](https://github.com/schrockwell/bodyguard)** - Authorization library for Phoenix
 
 ### Development & Quality
+
 - **[Credo](https://github.com/rrrene/credo)** - Static code analysis tool for Elixir
 - **[Dialyxir](https://github.com/jeremyjh/dialyxir)** - Static type checking
 - **[ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html)** - Unit testing framework
@@ -71,6 +83,7 @@ Provide a scalable, maintainable, and secure authorization system that can be ea
 ## :boom: Features
 
 ### ✅ **Authentication & User Management**
+
 - JWT-based authentication with refresh tokens
 - User registration with email verification
 - Password reset functionality
@@ -79,65 +92,70 @@ Provide a scalable, maintainable, and secure authorization system that can be ea
 - Account lockout after failed attempts
 
 ### ✅ **Authorization System**
+
 - **Role-Based Access Control (RBAC)**
-  - Dynamic role creation and management
-  - Role hierarchy with inheritance
-  - System roles protection
-  
+    - Dynamic role creation and management
+    - Role hierarchy with inheritance
+    - System roles protection
+
 - **Permission Management**
-  - Resource-based permissions
-  - Action-based permissions (CRUD operations)
-  - Scoped permissions (own, team, global)
-  - Permission inheritance through role hierarchy
-  - Wildcard permissions support
+    - Resource-based permissions
+    - Action-based permissions (CRUD operations)
+    - Scoped permissions (own, team, global)
+    - Permission inheritance through role hierarchy
+    - Wildcard permissions support
 
 ### ✅ **Advanced ACL Features**
+
 - **Permission Caching**
-  - Redis-based permission caching
-  - Automatic cache invalidation
-  - Performance optimization for permission checks
-  
+    - Redis-based permission caching
+    - Automatic cache invalidation
+    - Performance optimization for permission checks
+
 - **Audit Logging**
-  - Complete audit trail for all permission changes
-  - User action tracking
-  - Compliance-ready logging
-  
+    - Complete audit trail for all permission changes
+    - User action tracking
+    - Compliance-ready logging
+
 - **Multi-tenancy Support**
-  - Organization-based isolation
-  - Cross-tenant permission management
-  - Tenant-specific roles
+    - Organization-based isolation
+    - Cross-tenant permission management
+    - Tenant-specific roles
 
 ### ✅ **Domain-Driven Design Architecture**
+
 - **Bounded Contexts**
-  - Accounts (User management)
-  - Authorization (Roles & Permissions)
-  - Identity (Authentication)
-  - Audit (Logging & Compliance)
-  
+    - Accounts (User management)
+    - Authorization (Roles & Permissions)
+    - Identity (Authentication)
+    - Audit (Logging & Compliance)
+
 - **CQRS Implementation**
-  - Command/Query separation
-  - Event sourcing capabilities
-  - Domain events handling
-  
+    - Command/Query separation
+    - Event sourcing capabilities
+    - Domain events handling
+
 - **Clean Architecture**
-  - Clear separation of concerns
-  - Repository pattern
-  - Use case driven development
+    - Clear separation of concerns
+    - Repository pattern
+    - Use case driven development
 
 ### ✅ **REST API**
+
 - **Versioned API (v1)**
-  - RESTful endpoints
-  - JSON responses
-  - Pagination support
-  - Filtering and sorting
-  
+    - RESTful endpoints
+    - JSON responses
+    - Pagination support
+    - Filtering and sorting
+
 - **API Features**
-  - Rate limiting
-  - Request validation
-  - Error handling with fallback controller
-  - OpenAPI/Swagger documentation
+    - Rate limiting
+    - Request validation
+    - Error handling with fallback controller
+    - OpenAPI/Swagger documentation
 
 ### ✅ **Developer Experience**
+
 - Comprehensive test coverage
 - Database migrations with rollback support
 - Seed data for development
@@ -341,6 +359,7 @@ erDiagram
 ### Prerequisites
 
 Ensure you have the following installed:
+
 - **[Elixir](https://elixir-lang.org/install.html)** ~> 1.15
 - **[Erlang/OTP](https://www.erlang.org/downloads)** ~> 26
 - **[PostgreSQL](https://www.postgresql.org/download/)** >= 14
@@ -462,12 +481,14 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 For production deployment, ensure these environment variables are set:
 
 **Required**:
+
 - `SECRET_KEY_BASE` - Phoenix secret key base
 - `GUARDIAN_SECRET_KEY` - JWT signing key
 - `LIVEVIEW_SIGNING_SALT` - LiveView signing salt
 - `DATABASE_URL` - PostgreSQL connection URL
 
 **Recommended**:
+
 - `PHX_HOST` - Your domain name
 - `PORT` - Application port (default: 4000)
 - `LOG_LEVEL` - Logging level (info, warning, error)
@@ -518,6 +539,7 @@ mix precommit
 ### Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /api/v1/auth/register
 Content-Type: application/json
@@ -531,6 +553,7 @@ Content-Type: application/json
 ```
 
 #### Login
+
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
@@ -542,6 +565,7 @@ Content-Type: application/json
 ```
 
 #### Refresh Token
+
 ```http
 POST /api/v1/auth/refresh
 Authorization: Bearer <refresh_token>
@@ -550,18 +574,21 @@ Authorization: Bearer <refresh_token>
 ### User Management
 
 #### List Users
+
 ```http
 GET /api/v1/users?page=1&per_page=20&search=john
 Authorization: Bearer <access_token>
 ```
 
 #### Get User Details
+
 ```http
 GET /api/v1/users/:id
 Authorization: Bearer <access_token>
 ```
 
 #### Update User
+
 ```http
 PUT /api/v1/users/:id
 Authorization: Bearer <access_token>
@@ -576,12 +603,14 @@ Content-Type: application/json
 ### Role Management
 
 #### List Roles
+
 ```http
 GET /api/v1/roles
 Authorization: Bearer <access_token>
 ```
 
 #### Create Role
+
 ```http
 POST /api/v1/roles
 Authorization: Bearer <access_token>
@@ -596,6 +625,7 @@ Content-Type: application/json
 ```
 
 #### Assign Role to User
+
 ```http
 POST /api/v1/roles/:role_id/users/:user_id
 Authorization: Bearer <access_token>
@@ -610,12 +640,14 @@ Content-Type: application/json
 ### Permission Management
 
 #### List Permissions
+
 ```http
 GET /api/v1/permissions?resource=posts&action=read
 Authorization: Bearer <access_token>
 ```
 
 #### Create Permission
+
 ```http
 POST /api/v1/permissions
 Authorization: Bearer <access_token>
@@ -631,6 +663,7 @@ Content-Type: application/json
 ```
 
 #### Check User Permissions
+
 ```http
 GET /api/v1/users/:id/permissions
 Authorization: Bearer <access_token>
@@ -641,6 +674,7 @@ Authorization: Bearer <access_token>
 All API responses follow a consistent format:
 
 #### Success Response
+
 ```json
 {
   "data": {
@@ -653,6 +687,7 @@ All API responses follow a consistent format:
 ```
 
 #### Error Response
+
 ```json
 {
   "error": {
@@ -663,6 +698,7 @@ All API responses follow a consistent format:
 ```
 
 #### Paginated Response
+
 ```json
 {
   "data": [...],
@@ -874,6 +910,7 @@ spec:
 ## 📋 Roadmap
 
 ### Phase 1: Core Features ✅
+
 - [x] User authentication with JWT
 - [x] Role-based access control
 - [x] Permission management
@@ -882,6 +919,7 @@ spec:
 - [x] Docker support
 
 ### Phase 2: Advanced Features 🚧
+
 - [ ] GraphQL API support
 - [ ] WebSocket real-time updates
 - [ ] Advanced audit logging
@@ -890,6 +928,7 @@ spec:
 - [ ] OpenAPI/Swagger documentation
 
 ### Phase 3: Enterprise Features 📋
+
 - [ ] SAML/OAuth2 integration
 - [ ] Multi-factor authentication
 - [ ] Permission templates
@@ -928,7 +967,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## :handshake: **Contributors**
 
 | [![Contributors](https://contrib.rocks/image?repo=gabrielmaialva33/base-acl-ex)](https://github.com/gabrielmaialva33/base-acl-ex/graphs/contributors) |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+|-------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 <br>
 

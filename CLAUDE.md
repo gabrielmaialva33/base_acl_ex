@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a Phoenix web application (v1.8.1) using:
+
 - Elixir ~> 1.15
 - Phoenix LiveView ~> 1.1.0
 - Ecto with PostgreSQL
@@ -53,51 +54,55 @@ mix assets.deploy           # Build minified assets for production
 The application follows standard Phoenix 1.8 conventions with clear separation between web and business logic:
 
 - **`lib/base_acl_ex/`**: Core business logic and data layer
-  - `application.ex`: OTP application supervisor tree configuration
-  - `repo.ex`: Ecto repository for database operations
-  - `mailer.ex`: Email delivery configuration (using Swoosh)
+    - `application.ex`: OTP application supervisor tree configuration
+    - `repo.ex`: Ecto repository for database operations
+    - `mailer.ex`: Email delivery configuration (using Swoosh)
 
 - **`lib/base_acl_ex_web/`**: Web layer (controllers, views, LiveViews)
-  - `router.ex`: HTTP request routing with pipelines for browser and API
-  - `endpoint.ex`: Phoenix endpoint configuration
-  - `components/`: Reusable UI components
-    - `core_components.ex`: Standard Phoenix components (forms, inputs, icons)
-    - `layouts.ex`: Application layouts with flash message handling
-  - `controllers/`: Traditional Phoenix controllers
-  - LiveViews are placed directly in `lib/base_acl_ex_web/live/`
+    - `router.ex`: HTTP request routing with pipelines for browser and API
+    - `endpoint.ex`: Phoenix endpoint configuration
+    - `components/`: Reusable UI components
+        - `core_components.ex`: Standard Phoenix components (forms, inputs, icons)
+        - `layouts.ex`: Application layouts with flash message handling
+    - `controllers/`: Traditional Phoenix controllers
+    - LiveViews are placed directly in `lib/base_acl_ex_web/live/`
 
 ### Key Architectural Patterns
 
-1. **Phoenix 1.8 Component System**: Uses function components with HEEx templates. The `core_components.ex` provides pre-built components like `<.input>`, `<.form>`, and `<.icon>`.
+1. **Phoenix 1.8 Component System**: Uses function components with HEEx templates. The `core_components.ex` provides
+   pre-built components like `<.input>`, `<.form>`, and `<.icon>`.
 
 2. **Layout Wrapping**: All LiveView templates must begin with `<Layouts.app flash={@flash}>` wrapper.
 
 3. **HTTP Client**: Uses Req library (already included) for HTTP requests - avoid HTTPoison or Tesla.
 
-4. **Asset Pipeline**: 
-   - Tailwind CSS v4 with new import syntax (no config file)
-   - ESBuild for JavaScript bundling
-   - All assets must be imported through app.js/app.css
+4. **Asset Pipeline**:
+    - Tailwind CSS v4 with new import syntax (no config file)
+    - ESBuild for JavaScript bundling
+    - All assets must be imported through app.js/app.css
 
 5. **Development Tools**:
-   - LiveDashboard available at `/dev/dashboard` in development
-   - Swoosh mailbox preview at `/dev/mailbox` in development
+    - LiveDashboard available at `/dev/dashboard` in development
+    - Swoosh mailbox preview at `/dev/mailbox` in development
 
 ## Project-Specific Guidelines
 
 ### Phoenix v1.8 Specifics
+
 - Flash messages are handled by `<.flash_group>` in the Layouts module only
 - Use `<.link navigate={}>` and `<.link patch={}>` instead of deprecated `live_redirect`/`live_patch`
 - Forms use `Phoenix.Component.form/1` with `to_form/2` - never use deprecated `Phoenix.HTML.form_for`
 - Router scopes provide module aliasing - no need for additional aliases in route definitions
 
 ### Testing Approach
+
 - Uses ExUnit with Phoenix test helpers
 - LazyHTML library available for LiveView testing
 - Test files in `test/` mirror the `lib/` structure
 - ConnCase and DataCase support modules for test setup
 
 ### Code Style
+
 - Run `mix precommit` before committing changes to ensure code quality
 - Formatter configuration in `.formatter.exs` includes Phoenix.LiveView.HTMLFormatter
 - Always use pattern matching and pipelines for idiomatic Elixir code
