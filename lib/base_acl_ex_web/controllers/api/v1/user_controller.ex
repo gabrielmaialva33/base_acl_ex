@@ -163,20 +163,4 @@ defmodule BaseAclExWeb.Api.V1.UserController do
     # This would check the actual permissions
     false
   end
-
-  defp format_user(user) do
-    %{
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      phone_number: user.phone_number,
-      avatar_url: user.avatar_url,
-      email_verified: user.email_verified_at != nil,
-      two_factor_enabled: user.two_factor_enabled,
-      created_at: user.inserted_at,
-      updated_at: user.updated_at
-    }
-  end
 end
