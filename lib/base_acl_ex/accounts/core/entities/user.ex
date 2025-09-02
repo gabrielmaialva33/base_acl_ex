@@ -5,8 +5,6 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   """
 
   use BaseAclEx.SharedKernel.Entity
-  import Ecto.Changeset
-  
   alias BaseAclEx.Accounts.Core.ValueObjects.{Email, Password}
   alias BaseAclEx.SharedKernel.DomainEvent
 
