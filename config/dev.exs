@@ -105,3 +105,17 @@ config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
     "access" => {15, :minutes},
     "refresh" => {7, :days}
   }
+
+# Rate limiting configuration for development
+# More relaxed limits for development
+config :base_acl_ex,
+  rate_limiting_enabled:
+    String.to_existing_atom(System.get_env("RATE_LIMITING_ENABLED") || "true"),
+  rate_limiting_log_enabled:
+    String.to_existing_atom(System.get_env("RATE_LIMITING_LOG_ENABLED") || "true"),
+  rate_limiter_cache: [
+    # Smaller cache for dev
+    limit: 50_000,
+    # 3 minutes
+    cleanup_interval: 180_000
+  ]

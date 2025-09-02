@@ -70,6 +70,20 @@ config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
 
 # ttl and secret_key will be configured in environment-specific files
 
+# Rate limiting configuration
+config :base_acl_ex,
+  # Enable/disable rate limiting globally
+  rate_limiting_enabled: true,
+  # Enable logging of rate limit events
+  rate_limiting_log_enabled: false,
+  # Rate limiter cache configuration
+  rate_limiter_cache: [
+    # Max cache entries
+    limit: 100_000,
+    # 5 minutes
+    cleanup_interval: 300_000
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

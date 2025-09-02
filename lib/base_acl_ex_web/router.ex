@@ -12,9 +12,12 @@ defmodule BaseAclExWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug BaseAclEx.Infrastructure.Security.Plugs.RateLimiter, :api_limits
   end
 
   pipeline :api_auth do
+    plug :accepts, ["json"]
+    plug BaseAclEx.Infrastructure.Security.Plugs.RateLimiter, :auth_limits
     plug BaseAclEx.Infrastructure.Security.JWT.GuardianPipeline
     plug BaseAclEx.Infrastructure.Security.Plugs.EnsureAuthenticated
   end

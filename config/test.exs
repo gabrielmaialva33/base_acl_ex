@@ -46,3 +46,16 @@ config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
   secret_key:
     System.get_env("GUARDIAN_SECRET_KEY") || "test_guardian_secret_key_change_in_production",
   ttl: {String.to_integer(System.get_env("JWT_ACCESS_TOKEN_TTL_MINUTES") || "15"), :minutes}
+
+# Rate limiting configuration for testing
+# Disable rate limiting by default in tests to avoid interference
+config :base_acl_ex,
+  rate_limiting_enabled:
+    String.to_existing_atom(System.get_env("RATE_LIMITING_ENABLED") || "false"),
+  rate_limiting_log_enabled: false,
+  rate_limiter_cache: [
+    # Small cache for tests
+    limit: 1_000,
+    # 30 seconds
+    cleanup_interval: 30_000
+  ]

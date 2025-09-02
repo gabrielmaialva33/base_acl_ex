@@ -17,5 +17,17 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Rate limiting configuration for production
+# Strict limits for production environment
+config :base_acl_ex,
+  rate_limiting_enabled: true,
+  rate_limiting_log_enabled: true,
+  rate_limiter_cache: [
+    # Large cache for production
+    limit: 500_000,
+    # 10 minutes
+    cleanup_interval: 600_000
+  ]
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

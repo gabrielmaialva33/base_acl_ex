@@ -12,6 +12,8 @@ defmodule BaseAclEx.Application do
       BaseAclEx.Repo,
       {DNSCluster, query: Application.get_env(:base_acl_ex, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BaseAclEx.PubSub},
+      # Rate limiter cache (before other security services)
+      BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache,
       # CQRS and Permission services (order matters for dependencies)
       BaseAclEx.Identity.Application.Services.PermissionCache,
       BaseAclEx.SharedKernel.CQRS.CommandBus,
