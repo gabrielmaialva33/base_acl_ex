@@ -60,6 +60,13 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Guardian configuration for JWT authentication
+config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
+  issuer: "base_acl_ex",
+  ttl: {15, :minutes},
+  allowed_algos: ["HS256", "RS256"],
+  verify_issuer: true
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

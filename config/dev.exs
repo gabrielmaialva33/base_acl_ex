@@ -86,3 +86,7 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Guardian secret key for development
+config :base_acl_ex, BaseAclEx.Infrastructure.Security.JWT.GuardianImpl,
+  secret_key: "vErY_sEcReT_kEy_fOr_dEvElOpMeNt_OnLy_pLeAsE_cHaNgE_iN_pRoDuCtIoN"
