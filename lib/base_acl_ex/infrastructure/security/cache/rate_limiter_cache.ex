@@ -91,8 +91,6 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
 
   # Private functions
 
-
-
   defp schedule_cleanup do
     Process.send_after(self(), :cleanup, @cleanup_interval)
   end
