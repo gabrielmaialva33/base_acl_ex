@@ -59,9 +59,8 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     :username,
     :first_name,
     :last_name,
-    :phone,
+    :phone_number,
     :avatar_url,
-    :is_active,
     :metadata,
     :preferences,
     :two_factor_enabled
@@ -69,7 +68,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   @update_fields [
     :first_name,
     :last_name,
-    :phone,
+    :phone_number,
     :avatar_url,
     :username,
     :metadata,
@@ -129,8 +128,8 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
     user
     |> change(%{
       last_login_at: DateTime.utc_now(),
-      failed_login_attempts: 0,
-      locked_until: nil
+      failed_attempts: 0,
+      locked_at: nil
     })
     |> add_login_event(ip_address)
   end
@@ -139,13 +138,13 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   Records a failed login attempt.
   """
   def record_failed_login(%__MODULE__{} = user) do
-    attempts = user.failed_login_attempts + 1
-    locked_until = if attempts >= 5, do: DateTime.add(DateTime.utc_now(), 900, :second), else: nil
+    attempts = user.failed_attempts + 1
+    locked_at = if attempts >= 5, do: DateTime.add(DateTime.utc_now(), 900, :second), else: nil
 
     user
     |> change(%{
-      failed_login_attempts: attempts,
-      locked_until: locked_until
+      failed_attempts: attempts,
+      locked_at: locked_at
     })
     |> add_failed_login_event()
   end
@@ -156,9 +155,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   def delete(%__MODULE__{} = user) do
     user
     |> change(%{
-      is_deleted: true,
-      deleted_at: DateTime.utc_now(),
-      is_active: false
+      deleted_at: DateTime.utc_now()
     })
     |> add_deletion_event()
   end
@@ -169,9 +166,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   def restore(%__MODULE__{} = user) do
     user
     |> change(%{
-      is_deleted: false,
-      deleted_at: nil,
-      is_active: true
+      deleted_at: nil
     })
     |> add_restoration_event()
   end
@@ -203,17 +198,18 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   @doc """
   Checks if the user account is locked.
   """
-  def locked?(%__MODULE__{locked_until: nil}), do: false
+  def locked?(%__MODULE__{locked_at: nil}), do: false
 
-  def locked?(%__MODULE__{locked_until: locked_until}) do
-    DateTime.compare(DateTime.utc_now(), locked_until) == :lt
+  def locked?(%__MODULE__{locked_at: locked_at}) do
+    # Consider locked if it was locked in the last 15 minutes
+    DateTime.compare(DateTime.utc_now(), DateTime.add(locked_at, 900, :second)) == :lt
   end
 
   @doc """
   Checks if the user can login.
   """
   def can_login?(%__MODULE__{} = user) do
-    user.is_active && !user.is_deleted && !locked?(user)
+    is_nil(user.deleted_at) && !locked?(user)
   end
 
   @doc """
@@ -318,7 +314,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
 
   defp validate_phone(changeset) do
     changeset
-    |> validate_format(:phone, ~r/^\+?[1-9]\d{1,14}$/,
+    |> validate_format(:phone_number, ~r/^\+?[1-9]\d{1,14}$/,
       message: "must be a valid international phone number"
     )
   end
@@ -391,7 +387,7 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
 
   defp add_failed_login_event(changeset) do
     add_domain_event(changeset, "login_failed", %{
-      attempts: get_field(changeset, :failed_login_attempts)
+      attempts: get_field(changeset, :failed_attempts)
     })
   end
 
