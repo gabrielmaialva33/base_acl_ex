@@ -8,22 +8,15 @@ defmodule BaseAclEx.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      BaseAclEx.Repo,
-      # Start the Telemetry supervisor
       BaseAclExWeb.Telemetry,
-      # Start the PubSub system
+      BaseAclEx.Repo,
+      {DNSCluster, query: Application.get_env(:base_acl_ex, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BaseAclEx.PubSub},
-      # Start the Endpoint (http/https)
-      BaseAclExWeb.Endpoint
       # Start a worker by calling: BaseAclEx.Worker.start_link(arg)
-      # {BaseAclEx.Worker, arg}
+      # {BaseAclEx.Worker, arg},
+      # Start to serve requests, typically the last entry
+      BaseAclExWeb.Endpoint
     ]
-
-    unless Mix.env() == :prod do
-      Dotenv.load()
-      Mix.Task.run("loadconfig")
-    end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

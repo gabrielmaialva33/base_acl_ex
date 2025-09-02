@@ -9,14 +9,18 @@ import Config
 
 config :base_acl_ex,
   ecto_repos: [BaseAclEx.Repo],
-  generators: [binary_id: true]
+  generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :base_acl_ex, BaseAclExWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: BaseAclExWeb.ErrorView, accepts: ~w(json), layout: false],
+  adapter: Bandit.PhoenixAdapter,
+  render_errors: [
+    formats: [html: BaseAclExWeb.ErrorHTML, json: BaseAclExWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: BaseAclEx.PubSub,
-  live_view: [signing_salt: "e/R8PTch"]
+  live_view: [signing_salt: "TKq9698w"]
 
 # Configures the mailer
 #
@@ -27,26 +31,34 @@ config :base_acl_ex, BaseAclExWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :base_acl_ex, BaseAclEx.Mailer, adapter: Swoosh.Adapters.Local
 
-# Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
+# Configure esbuild (the version is required)
+config :esbuild,
+  version: "0.25.4",
+  base_acl_ex: [
+    args:
+      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "4.1.7",
+  base_acl_ex: [
+    args: ~w(
+      --input=assets/css/app.css
+      --output=priv/static/assets/css/app.css
+    ),
+    cd: Path.expand("..", __DIR__)
+  ]
 
 # Configures Elixir's Logger
-config :logger, :console,
+config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-config :base_acl_ex, BaseAclEx.Guardian,
-  issuer: "base_acl_ex",
-  ttl: {30, :days},
-  allowed_drift: 2000,
-  secret_key: "fRK+MLCXJyIiSYv3y7bVk5YZxUO5WDexwuu2uhKjyVbn5NcZZBXhNlKFC2qPVhpW",
-  serializer: BaseAclExWeb.Views.TokenView
-
-# Use Flop for pagination in Phoenix
-config :flop, repo: BaseAclEx.Repo
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
