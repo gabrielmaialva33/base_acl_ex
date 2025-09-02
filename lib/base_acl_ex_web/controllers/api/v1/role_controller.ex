@@ -17,9 +17,9 @@ defmodule BaseAclExWeb.Api.V1.RoleController do
     RemoveRoleFromUserHandler
   }
 
+  alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Authorization.Core.Entities.Role
   alias BaseAclEx.Authorization.Core.Entities.UserRole
-  alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Persistence.Repo
 
   action_fallback BaseAclExWeb.FallbackController
