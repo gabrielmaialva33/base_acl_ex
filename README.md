@@ -404,7 +404,7 @@ Create a `.env` file in the project root:
 
 ```env
 # Database Configuration
-DATABASE_URL=ecto://postgres:postgres@localhost/base-acl-ex_dev
+DATABASE_URL=ecto://postgres:postgres@localhost/base_acl_ex_dev
 DATABASE_POOL_SIZE=10
 
 # Redis Configuration (optional)
@@ -766,7 +766,7 @@ Cache Hit Rate: 95%+
 
 ```elixir
 # config/prod.exs
-config :base-acl-ex, BaseAclExWeb.Endpoint,
+config :base_acl_ex, BaseAclExWeb.Endpoint,
   url: [host: "your-domain.com", port: 443],
   https: [
     port: 443,
@@ -879,7 +879,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## :handshake: **Contributors**
 
-| [![Contributors](https://contrib.rocks/image?repo=gabrielmaialva33/base_acl_ex)](https://github.com/gabrielmaialva33/base_acl_ex/graphs/contributors) |
+| [![Contributors](https://contrib.rocks/image?repo=gabrielmaialva33/base-acl-ex)](https://github.com/gabrielmaialva33/base-acl-ex/graphs/contributors) |
 |---------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 <br>
