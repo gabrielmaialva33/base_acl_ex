@@ -5,7 +5,6 @@ defmodule BaseAclEx.Accounts.Core.ValueObjects.Email do
   """
 
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

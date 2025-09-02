@@ -5,7 +5,6 @@ defmodule BaseAclEx.Identity.Core.Aggregates.PermissionAggregate do
   """
 
   use Ecto.Schema
-  import Ecto.Changeset
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Identity.Core.Entities.{Permission, Role}
 

@@ -4,7 +4,6 @@ defmodule BaseAclEx.Accounts.Application.Commands.RegisterUserCommand do
   """
 
   use BaseAclEx.SharedKernel.CQRS.Command
-  import Ecto.Changeset
 
   @enforce_keys [:email, :password, :first_name, :last_name]
   defstruct [
