@@ -11,6 +11,7 @@ defmodule BaseAclExWeb.Api.V1.UserController do
   alias BaseAclEx.Accounts.Application.Queries.{GetUserByIdQuery, GetUserPermissionsQuery}
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclExWeb.Formatters.UserFormatter
 
   action_fallback BaseAclExWeb.FallbackController
 
@@ -86,7 +87,7 @@ defmodule BaseAclExWeb.Api.V1.UserController do
         {:ok, updated_user} ->
           conn
           |> put_status(:ok)
-          |> render(:show, user: format_user(updated_user))
+          |> render(:show, user: UserFormatter.format_user(updated_user))
 
         {:error, changeset} ->
           conn
