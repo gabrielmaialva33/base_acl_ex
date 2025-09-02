@@ -47,6 +47,20 @@ defmodule BaseAclExWeb.Router do
     resources "/users", UserController, only: [:index, :show, :update, :delete] do
       get "/permissions", UserController, :permissions, as: :permissions
     end
+
+    # Role management routes
+    resources "/roles", RoleController, only: [:index, :show, :create, :update, :delete] do
+      get "/users", RoleController, :users, as: :users
+      post "/users/:user_id", RoleController, :assign_user, as: :assign_user
+      delete "/users/:user_id", RoleController, :remove_user, as: :remove_user
+    end
+
+    # Permission management routes
+    resources "/permissions", PermissionController, only: [:index, :show, :create, :update, :delete] do
+      get "/roles", PermissionController, :roles, as: :roles
+      post "/roles/:role_id", PermissionController, :assign_role, as: :assign_role
+      delete "/roles/:role_id", PermissionController, :remove_role, as: :remove_role
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
