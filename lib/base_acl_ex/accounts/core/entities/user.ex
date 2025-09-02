@@ -223,6 +223,39 @@ defmodule BaseAclEx.Accounts.Core.Entities.User do
   def email_verified?(%__MODULE__{}), do: true
 
   @doc """
+  Creates a changeset for user registration.
+  """
+  def registration_changeset(%__MODULE__{} = user, attrs) do
+    user
+    |> cast(attrs, [:email, :password_hash, :first_name, :last_name, :username, 
+                    :phone_number, :newsletter_opt_in, :terms_accepted_at])
+    |> validate_required([:email, :password_hash, :first_name, :last_name])
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> unique_constraint(:email)
+    |> unique_constraint(:username)
+  end
+
+  @doc """
+  Creates a changeset for updating user profile.
+  """
+  def update_changeset(%__MODULE__{} = user, attrs) do
+    user
+    |> cast(attrs, [:first_name, :last_name, :username, :phone_number, :avatar_url])
+    |> validate_length(:first_name, min: 1, max: 100)
+    |> validate_length(:last_name, min: 1, max: 100)
+    |> validate_length(:username, min: 3, max: 50)
+    |> unique_constraint(:username)
+  end
+
+  @doc """
+  Creates a changeset for soft deleting a user.
+  """
+  def delete_changeset(%__MODULE__{} = user) do
+    user
+    |> change(%{deleted_at: DateTime.utc_now()})
+  end
+
+  @doc """
   Gets the user's full name.
   """
   def full_name(%__MODULE__{first_name: first, last_name: last}) do
