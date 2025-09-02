@@ -26,13 +26,16 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
     # Start the cache with appropriate policies
     cache_opts = [
       # Default expiration - entries expire after 1 hour
-      expiration: 
-        expiration(
-          default: :timer.hours(1),
-          lazy: true
-        ),
+      expiration: [
+        default: :timer.hours(1),
+        lazy: true
+      ],
       # Size limit - LRU eviction when limit reached  
-      limit: limit,
+      limit: [
+        size: limit,
+        policy: :lru,
+        reclaim: 0.1
+      ],
       # Statistics tracking for monitoring
       stats: true
     ]
