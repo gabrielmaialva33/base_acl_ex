@@ -1,0 +1,432 @@
+# BaseAclEx API Documentation
+# REST Client file for testing all API endpoints
+# 
+# How to use:
+# 1. Install REST Client extension in VS Code
+# 2. Click "Send Request" above each ### request
+# 3. Update variables in @baseUrl and @token as needed
+#
+# Variables
+@baseUrl = http://localhost:4000/api/v1
+@token = {{login.response.body.tokens.access_token}}
+
+################################################################################
+# AUTHENTICATION ENDPOINTS
+################################################################################
+
+### User Registration
+# POST /api/v1/auth/register
+# Creates a new user account
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "newuser@teste.com",
+  "username": "newuser",
+  "first_name": "New",
+  "last_name": "User", 
+  "password": "12345678",
+  "password_confirmation": "12345678",
+  "terms_accepted": true
+}
+
+### User Login
+# @name login
+# POST /api/v1/auth/login
+# Authenticates user and returns JWT tokens
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
+
+### Refresh Token
+# POST /api/v1/auth/refresh
+# Refreshes access token using refresh token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{login.response.body.tokens.refresh_token}}"
+}
+
+################################################################################
+# PROTECTED AUTHENTICATION ENDPOINTS
+################################################################################
+
+### Get Current User
+# GET /api/v1/auth/me
+# Returns current authenticated user information
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Verify Token
+# GET /api/v1/auth/verify
+# Verifies if the current token is valid
+GET {{baseUrl}}/auth/verify
+Authorization: Bearer {{token}}
+
+### Get User Devices
+# GET /api/v1/auth/devices
+# Returns list of user devices and active sessions
+GET {{baseUrl}}/auth/devices
+Authorization: Bearer {{token}}
+
+### Revoke Device Token
+# DELETE /api/v1/auth/devices/:device_id
+# Revokes tokens for a specific device
+DELETE {{baseUrl}}/auth/devices/device123
+Authorization: Bearer {{token}}
+
+### Get Token Statistics
+# GET /api/v1/auth/stats
+# Returns token usage statistics for the user
+GET {{baseUrl}}/auth/stats
+Authorization: Bearer {{token}}
+
+### Logout (Current Device)
+# POST /api/v1/auth/logout
+# Logs out from current device only
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+### Logout (All Devices)
+# POST /api/v1/auth/logout
+# Logs out from all devices
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "all_devices": true
+}
+
+################################################################################
+# USER MANAGEMENT ENDPOINTS
+################################################################################
+
+### List Users
+# GET /api/v1/users
+# Returns paginated list of users with optional search
+GET {{baseUrl}}/users?page=1&per_page=20&search=admin
+Authorization: Bearer {{token}}
+
+### Get User by ID
+# GET /api/v1/users/:id
+# Returns specific user information
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+### Update User
+# PUT /api/v1/users/:id
+# Updates user information
+PUT {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Updated",
+  "last_name": "Name",
+  "phone_number": "+1234567890"
+}
+
+### Delete User
+# DELETE /api/v1/users/:id
+# Soft deletes a user account
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+### Get User Permissions
+# GET /api/v1/users/:id/permissions
+# Returns all permissions for a specific user
+GET {{baseUrl}}/users/1/permissions
+Authorization: Bearer {{token}}
+
+################################################################################
+# ROLE MANAGEMENT ENDPOINTS
+################################################################################
+
+### List Roles
+# GET /api/v1/roles
+# Returns paginated list of roles with optional search
+GET {{baseUrl}}/roles?page=1&per_page=20&search=admin
+Authorization: Bearer {{token}}
+
+### Get Role by ID
+# GET /api/v1/roles/:id
+# Returns specific role information
+GET {{baseUrl}}/roles/1
+Authorization: Bearer {{token}}
+
+### Create Role
+# POST /api/v1/roles
+# Creates a new role
+POST {{baseUrl}}/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Custom Role",
+  "slug": "custom_role",
+  "description": "A custom role for testing",
+  "priority": 10,
+  "is_active": true
+}
+
+### Update Role
+# PUT /api/v1/roles/:id
+# Updates role information
+PUT {{baseUrl}}/roles/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Updated Role Name",
+  "description": "Updated description",
+  "is_active": true
+}
+
+### Delete Role
+# DELETE /api/v1/roles/:id
+# Soft deletes a role
+DELETE {{baseUrl}}/roles/1
+Authorization: Bearer {{token}}
+
+### Get Role Users
+# GET /api/v1/roles/:id/users
+# Returns all users assigned to a specific role
+GET {{baseUrl}}/roles/1/users
+Authorization: Bearer {{token}}
+
+### Assign User to Role
+# POST /api/v1/roles/:id/users/:user_id
+# Assigns a user to a role
+POST {{baseUrl}}/roles/1/users/2
+Authorization: Bearer {{token}}
+
+### Remove User from Role
+# DELETE /api/v1/roles/:id/users/:user_id
+# Removes a user from a role
+DELETE {{baseUrl}}/roles/1/users/2
+Authorization: Bearer {{token}}
+
+################################################################################
+# PERMISSION MANAGEMENT ENDPOINTS
+################################################################################
+
+### List Permissions
+# GET /api/v1/permissions
+# Returns paginated list of permissions with optional filters
+GET {{baseUrl}}/permissions?page=1&per_page=20&search=users&resource=users&action=create
+Authorization: Bearer {{token}}
+
+### Get Permission by ID
+# GET /api/v1/permissions/:id
+# Returns specific permission information
+GET {{baseUrl}}/permissions/1
+Authorization: Bearer {{token}}
+
+### Create Permission
+# POST /api/v1/permissions
+# Creates a new permission
+POST {{baseUrl}}/permissions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "custom.action.resource",
+  "action": "custom_action",
+  "resource": "custom_resource",
+  "description": "Custom permission for testing",
+  "category": "custom",
+  "risk_level": "low",
+  "is_active": true
+}
+
+### Update Permission
+# PUT /api/v1/permissions/:id
+# Updates permission information
+PUT {{baseUrl}}/permissions/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Updated permission description",
+  "risk_level": "medium",
+  "is_active": true
+}
+
+### Delete Permission
+# DELETE /api/v1/permissions/:id
+# Soft deletes a permission
+DELETE {{baseUrl}}/permissions/1
+Authorization: Bearer {{token}}
+
+### Get Permission Roles
+# GET /api/v1/permissions/:id/roles
+# Returns all roles that have a specific permission
+GET {{baseUrl}}/permissions/1/roles
+Authorization: Bearer {{token}}
+
+### Assign Permission to Role
+# POST /api/v1/permissions/:id/roles/:role_id
+# Grants a permission to a role
+POST {{baseUrl}}/permissions/1/roles/2
+Authorization: Bearer {{token}}
+
+### Remove Permission from Role
+# DELETE /api/v1/permissions/:id/roles/:role_id
+# Revokes a permission from a role
+DELETE {{baseUrl}}/permissions/1/roles/2
+Authorization: Bearer {{token}}
+
+################################################################################
+# RATE LIMITER ADMIN ENDPOINTS
+################################################################################
+
+### Get Rate Limiter Stats
+# GET /api/v1/admin/rate-limiter/stats
+# Returns rate limiting statistics
+GET {{baseUrl}}/admin/rate-limiter/stats
+Authorization: Bearer {{token}}
+
+### List Active Limits
+# GET /api/v1/admin/rate-limiter/limits
+# Returns all active rate limits
+GET {{baseUrl}}/admin/rate-limiter/limits
+Authorization: Bearer {{token}}
+
+### Get Specific Limit
+# GET /api/v1/admin/rate-limiter/limits/:identifier
+# Returns rate limit information for specific identifier
+GET {{baseUrl}}/admin/rate-limiter/limits/api_127.0.0.1
+Authorization: Bearer {{token}}
+
+### Remove Specific Limit
+# DELETE /api/v1/admin/rate-limiter/limits/:identifier
+# Removes rate limit for specific identifier
+DELETE {{baseUrl}}/admin/rate-limiter/limits/api_127.0.0.1
+Authorization: Bearer {{token}}
+
+### Clear All Limits
+# DELETE /api/v1/admin/rate-limiter/limits
+# Clears all active rate limits
+DELETE {{baseUrl}}/admin/rate-limiter/limits
+Authorization: Bearer {{token}}
+
+### Export Rate Limiter Data
+# GET /api/v1/admin/rate-limiter/export
+# Exports rate limiter data for analysis
+GET {{baseUrl}}/admin/rate-limiter/export
+Authorization: Bearer {{token}}
+
+### Test Rate Limit
+# POST /api/v1/admin/rate-limiter/test
+# Tests rate limiting for a specific scenario
+POST {{baseUrl}}/admin/rate-limiter/test
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "identifier": "test_user",
+  "limit": 100,
+  "window": 60
+}
+
+################################################################################
+# CURL EXAMPLES
+################################################################################
+
+# User Registration with curl
+# curl -X POST http://localhost:4000/api/v1/auth/register \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "email": "newuser@teste.com",
+#     "username": "newuser", 
+#     "first_name": "New",
+#     "last_name": "User",
+#     "password": "12345678",
+#     "password_confirmation": "12345678",
+#     "terms_accepted": true
+#   }'
+
+# User Login with curl
+# curl -X POST http://localhost:4000/api/v1/auth/login \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "email": "admin@example.com",
+#     "password": "Admin123!"
+#   }'
+
+# Get Current User with curl
+# curl -X GET http://localhost:4000/api/v1/auth/me \
+#   -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# List Users with curl
+# curl -X GET "http://localhost:4000/api/v1/users?page=1&per_page=20" \
+#   -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Create Role with curl  
+# curl -X POST http://localhost:4000/api/v1/roles \
+#   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "name": "Custom Role",
+#     "slug": "custom_role",
+#     "description": "A custom role for testing",
+#     "priority": 10,
+#     "is_active": true
+#   }'
+
+################################################################################
+# COMMON ERRORS AND RESPONSES
+################################################################################
+
+# 401 Unauthorized - Missing or invalid token
+# {
+#   "error": {
+#     "message": "Unauthorized",
+#     "code": "unauthorized"
+#   }
+# }
+
+# 403 Forbidden - Insufficient permissions
+# {
+#   "error": {
+#     "message": "Forbidden: insufficient permissions",
+#     "code": "insufficient_permissions"
+#   }
+# }
+
+# 422 Unprocessable Entity - Validation errors
+# {
+#   "errors": [
+#     {
+#       "field": "email",
+#       "message": "is required"
+#     },
+#     {
+#       "field": "password", 
+#       "message": "must be at least 8 characters"
+#     }
+#   ]
+# }
+
+# 404 Not Found - Resource not found
+# {
+#   "error": {
+#     "message": "Not found",
+#     "code": "not_found"
+#   }
+# }
+
+# 429 Too Many Requests - Rate limit exceeded
+# {
+#   "error": {
+#     "message": "Rate limit exceeded",
+#     "code": "rate_limit_exceeded",
+#     "retry_after": 60
+#   }
+# }
