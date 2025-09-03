@@ -10,7 +10,7 @@ defmodule BaseAclExWeb.Api.V1.UserController do
   alias BaseAclEx.Accounts.Application.Handlers.{GetUserByIdHandler, GetUserPermissionsHandler}
   alias BaseAclEx.Accounts.Application.Queries.{GetUserByIdQuery, GetUserPermissionsQuery}
   alias BaseAclEx.Accounts.Core.Entities.User
-  alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclEx.Repo
   alias BaseAclExWeb.Formatters.UserFormatter
 
   action_fallback BaseAclExWeb.FallbackController

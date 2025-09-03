@@ -10,7 +10,7 @@ defmodule BaseAclEx.Accounts.Application.Handlers.RegisterUserHandler do
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Accounts.Core.ValueObjects.{Email, Password}
   alias BaseAclEx.Identity.Core.Entities.Role
-  alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclEx.Repo
 
   @impl true
   def execute(%RegisterUserCommand{} = command) do

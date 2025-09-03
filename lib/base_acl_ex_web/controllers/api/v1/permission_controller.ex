@@ -9,7 +9,7 @@ defmodule BaseAclExWeb.Api.V1.PermissionController do
 
   alias BaseAclEx.Identity.Core.Entities.{Permission, RolePermission}
   alias BaseAclEx.Identity.Core.Entities.Role
-  alias BaseAclEx.Infrastructure.Persistence.Repo
+  alias BaseAclEx.Repo
 
   action_fallback BaseAclExWeb.FallbackController
 

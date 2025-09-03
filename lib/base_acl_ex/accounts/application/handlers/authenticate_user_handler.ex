@@ -10,8 +10,8 @@ defmodule BaseAclEx.Accounts.Application.Handlers.AuthenticateUserHandler do
   alias BaseAclEx.Accounts.Core.Entities.User
   alias BaseAclEx.Accounts.Core.ValueObjects.Password
   alias BaseAclEx.Identity.Application.Services.PermissionCache
-  alias BaseAclEx.Infrastructure.Persistence.Repo
   alias BaseAclEx.Infrastructure.Security.JWT.GuardianImpl
+  alias BaseAclEx.Repo
 
   @impl true
   def execute(%AuthenticateUserCommand{} = command) do

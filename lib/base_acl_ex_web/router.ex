@@ -22,6 +22,25 @@ defmodule BaseAclExWeb.Router do
     plug BaseAclEx.Infrastructure.Security.Plugs.EnsureAuthenticated
   end
 
+  pipeline :admin_browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {BaseAclExWeb.Layouts, :admin}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug BaseAclEx.Infrastructure.Security.Plugs.RateLimiter, :admin_limits
+  end
+
+  pipeline :admin_auth do
+    plug BaseAclEx.Infrastructure.Security.JWT.GuardianPipeline
+    plug BaseAclEx.Infrastructure.Security.Plugs.EnsureAuthenticated
+
+    plug BaseAclEx.Infrastructure.Security.Plugs.EnsurePermissions,
+      action: :admin,
+      resource: :system
+  end
+
   scope "/", BaseAclExWeb do
     pipe_through :browser
 
@@ -80,6 +99,47 @@ defmodule BaseAclExWeb.Router do
       delete "/rate-limiter/limits", RateLimiterController, :clear_all_limits
       get "/rate-limiter/export", RateLimiterController, :export_data
       post "/rate-limiter/test", RateLimiterController, :test_limit
+    end
+  end
+
+  # Admin interface routes
+  scope "/admin", BaseAclExWeb.Admin do
+    pipe_through [:admin_browser]
+
+    # Public admin routes (login)
+    live_session :admin_public, on_mount: BaseAclExWeb.AdminAuth do
+      live "/login", AuthLive.Login, :login
+    end
+  end
+
+  scope "/admin", BaseAclExWeb.Admin do
+    pipe_through [:admin_browser, :admin_auth]
+
+    # Protected admin routes
+    live_session :admin_protected, on_mount: BaseAclExWeb.AdminAuth do
+      live "/", DashboardLive, :index
+      live "/dashboard", DashboardLive, :index
+
+      live "/users", UserLive.Index, :index
+      live "/users/new", UserLive.Index, :new
+      live "/users/:id/edit", UserLive.Index, :edit
+      live "/users/:id", UserLive.Show, :show
+      live "/users/:id/show/edit", UserLive.Show, :edit
+
+      live "/roles", RoleLive.Index, :index
+      live "/roles/new", RoleLive.Index, :new
+      live "/roles/:id/edit", RoleLive.Index, :edit
+      live "/roles/:id", RoleLive.Show, :show
+      live "/roles/:id/show/edit", RoleLive.Show, :edit
+
+      live "/permissions", PermissionLive.Index, :index
+      live "/permissions/new", PermissionLive.Index, :new
+      live "/permissions/:id/edit", PermissionLive.Index, :edit
+      live "/permissions/:id", PermissionLive.Show, :show
+      live "/permissions/:id/show/edit", PermissionLive.Show, :edit
+
+      live "/audit", AuditLive.Index, :index
+      live "/rate-limiting", RateLimitingLive.Index, :index
     end
   end
 

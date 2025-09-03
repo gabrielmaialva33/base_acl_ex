@@ -5,6 +5,196 @@ defmodule BaseAclExWeb.Layouts do
   """
   use BaseAclExWeb, :html
 
+  @doc """
+  Renders your admin layout with sidebar navigation.
+
+  This function provides the admin dashboard layout with navigation menu,
+  user controls, and responsive design.
+
+  ## Examples
+
+      <Layouts.admin flash={@flash} current_user={@current_user}>
+        <h1>Admin Content</h1>
+      </Layouts.admin>
+
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  attr :current_user, :map, default: nil, doc: "the current authenticated admin user"
+
+  slot :inner_block, required: true
+
+  def admin(assigns) do
+    ~H"""
+    <div class="drawer lg:drawer-open">
+      <!-- Mobile drawer toggle -->
+      <input id="drawer-toggle" type="checkbox" class="drawer-toggle" />
+
+      <div class="drawer-content flex flex-col">
+        <!-- Admin header -->
+        <header class="navbar bg-base-200 shadow-sm">
+          <div class="navbar-start">
+            <label for="drawer-toggle" class="btn btn-ghost btn-circle drawer-button lg:hidden">
+              <.icon name="hero-bars-3" class="size-6" />
+            </label>
+            <h1 class="text-xl font-bold ml-2 lg:ml-0">BaseAclEx Admin</h1>
+          </div>
+
+          <div class="navbar-end">
+            <div class="flex items-center space-x-2">
+              <.theme_toggle />
+
+              <%= if @current_user do %>
+                <div class="dropdown dropdown-end">
+                  <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-8 rounded-full bg-primary text-primary-content flex items-center justify-center">
+                      <span class="text-sm font-semibold">
+                        {String.first(@current_user.name || @current_user.email) |> String.upcase()}
+                      </span>
+                    </div>
+                  </div>
+                  <ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg">
+                    <li class="menu-title">
+                      <span>{@current_user.name || @current_user.email}</span>
+                    </li>
+                    <li><a class="btn btn-ghost btn-sm" href="/admin/profile">Profile</a></li>
+                    <li>
+                      <a class="btn btn-ghost btn-sm" href="/admin/logout" data-method="post">
+                        Logout
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              <% else %>
+                <a href="/admin/login" class="btn btn-primary btn-sm">Login</a>
+              <% end %>
+            </div>
+          </div>
+        </header>
+        
+    <!-- Main content -->
+        <main class="flex-1 p-4 lg:p-6">
+          <.flash_group flash={@flash} />
+          {render_slot(@inner_block)}
+        </main>
+      </div>
+      
+    <!-- Sidebar -->
+      <div class="drawer-side">
+        <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="bg-base-100 min-h-full w-64 border-r border-base-300">
+          <!-- Logo/Brand -->
+          <div class="p-4 border-b border-base-300">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <.icon name="hero-shield-check" class="size-5 text-primary-content" />
+              </div>
+              <div>
+                <h2 class="font-bold text-lg">BaseACL</h2>
+                <p class="text-xs text-base-content/70">Admin Dashboard</p>
+              </div>
+            </div>
+          </div>
+          
+    <!-- Navigation Menu -->
+          <nav class="p-4">
+            <ul class="menu menu-vertical space-y-1">
+              <li>
+                <a href="/admin" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200">
+                  <.icon name="hero-squares-2x2" class="size-5" />
+                  <span>Dashboard</span>
+                </a>
+              </li>
+              
+    <!-- User Management -->
+              <li>
+                <details>
+                  <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200">
+                    <.icon name="hero-users" class="size-5" />
+                    <span>User Management</span>
+                  </summary>
+                  <ul class="ml-8 space-y-1">
+                    <li>
+                      <a href="/admin/users" class="p-2 hover:bg-base-200 rounded">All Users</a>
+                    </li>
+                    <li>
+                      <a href="/admin/users/new" class="p-2 hover:bg-base-200 rounded">Add User</a>
+                    </li>
+                  </ul>
+                </details>
+              </li>
+              
+    <!-- Role Management -->
+              <li>
+                <details>
+                  <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200">
+                    <.icon name="hero-user-group" class="size-5" />
+                    <span>Roles</span>
+                  </summary>
+                  <ul class="ml-8 space-y-1">
+                    <li>
+                      <a href="/admin/roles" class="p-2 hover:bg-base-200 rounded">All Roles</a>
+                    </li>
+                    <li>
+                      <a href="/admin/roles/new" class="p-2 hover:bg-base-200 rounded">Create Role</a>
+                    </li>
+                  </ul>
+                </details>
+              </li>
+              
+    <!-- Permission Management -->
+              <li>
+                <details>
+                  <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200">
+                    <.icon name="hero-key" class="size-5" />
+                    <span>Permissions</span>
+                  </summary>
+                  <ul class="ml-8 space-y-1">
+                    <li>
+                      <a href="/admin/permissions" class="p-2 hover:bg-base-200 rounded">
+                        All Permissions
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/admin/permissions/new" class="p-2 hover:bg-base-200 rounded">
+                        Create Permission
+                      </a>
+                    </li>
+                  </ul>
+                </details>
+              </li>
+              
+    <!-- Monitoring -->
+              <li class="pt-4">
+                <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wide mb-2">
+                  Monitoring
+                </div>
+              </li>
+              <li>
+                <a
+                  href="/admin/audit"
+                  class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200"
+                >
+                  <.icon name="hero-document-text" class="size-5" />
+                  <span>Audit Logs</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/admin/rate-limiting"
+                  class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200"
+                >
+                  <.icon name="hero-chart-bar" class="size-5" />
+                  <span>Rate Limiting</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    """
+  end
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers

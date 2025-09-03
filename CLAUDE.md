@@ -116,3 +116,122 @@ The application follows standard Phoenix 1.8 conventions with clear separation b
 5. **Always preload Ecto associations** when accessing them in templates
 6. **Use LiveView streams** for collections to avoid memory issues
 7. **Tailwind v4 doesn't need tailwind.config.js** - uses new import syntax in app.css
+
+## Docker Development Commands
+
+The project includes Docker and Docker Compose configurations for easy development and production deployment.
+
+### Docker Compose Commands
+
+```bash
+# Start only PostgreSQL (for local development)
+docker-compose up postgres
+
+# Start all services (PostgreSQL + Redis)
+docker-compose --profile dev up
+
+# Start full stack including the Phoenix app
+docker-compose --profile full up
+
+# Build and start all services
+docker-compose --profile full up --build
+
+# Start services in background
+docker-compose --profile full up -d
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (clean state)
+docker-compose down -v
+
+# View logs from all services
+docker-compose logs
+
+# View logs from specific service
+docker-compose logs app
+docker-compose logs postgres
+```
+
+### Docker Build Commands
+
+```bash
+# Build the Phoenix application image
+docker build -t base_acl_ex .
+
+# Build with specific tag
+docker build -t base_acl_ex:v1.0.0 .
+
+# Build for production with build args
+docker build --build-arg MIX_ENV=prod -t base_acl_ex:prod .
+
+# Run the built image
+docker run -p 4000:4000 --env-file .env.docker base_acl_ex
+
+# Run with interactive terminal
+docker run -it -p 4000:4000 --env-file .env.docker base_acl_ex /bin/bash
+```
+
+### Development Workflow with Docker
+
+1. **Initial setup:**
+   ```bash
+   # Start database services
+   docker-compose up postgres redis -d
+   
+   # Run migrations on local Elixir
+   mix ecto.create
+   mix ecto.migrate
+   
+   # Start Phoenix locally
+   mix phx.server
+   ```
+
+2. **Full containerized development:**
+   ```bash
+   # Build and start everything
+   docker-compose --profile full up --build
+   
+   # Access the application at http://localhost:4000
+   ```
+
+3. **Database operations with Docker:**
+   ```bash
+   # Access PostgreSQL container
+   docker-compose exec postgres psql -U postgres -d base_acl_ex_dev
+   
+   # Backup database
+   docker-compose exec postgres pg_dump -U postgres base_acl_ex_dev > backup.sql
+   
+   # Restore database
+   docker-compose exec -T postgres psql -U postgres base_acl_ex_dev < backup.sql
+   ```
+
+### Environment Configuration
+
+- **`.env.example`**: Template for local environment variables
+- **`.env.docker`**: Docker-specific environment configuration
+- **`docker-compose.yml`**: Multi-service orchestration with profiles
+
+### Docker Image Optimization
+
+The Dockerfile uses multi-stage builds to create optimized production images:
+
+- **Builder stage**: Full Elixir environment for compilation
+- **Runner stage**: Minimal Debian slim with only runtime dependencies
+- **Final image size**: ~40-50MB (vs 200MB+ single-stage)
+- **Security**: Non-root user, minimal attack surface
+
+### Production Deployment
+
+```bash
+# Build production image
+docker build --target runner --build-arg MIX_ENV=prod -t base_acl_ex:prod .
+
+# Run production container
+docker run -d \
+  --name base_acl_ex_prod \
+  -p 4000:4000 \
+  --env-file .env.production \
+  base_acl_ex:prod
+```

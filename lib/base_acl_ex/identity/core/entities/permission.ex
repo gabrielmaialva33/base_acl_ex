@@ -93,6 +93,17 @@ defmodule BaseAclEx.Identity.Core.Entities.Permission do
   end
 
   @doc """
+  Generic changeset function for controllers.
+  """
+  def changeset(permission_or_struct \\ %__MODULE__{}, attrs) do
+    case permission_or_struct do
+      %__MODULE__{id: nil} -> new(attrs)
+      %__MODULE__{} -> update(permission_or_struct, attrs)
+      _ -> new(attrs)
+    end
+  end
+
+  @doc """
   Creates a permission from resource, action, and context strings.
   """
   def from_components(resource, action, context \\ "any") do

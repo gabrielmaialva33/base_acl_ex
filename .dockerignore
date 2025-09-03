@@ -1,0 +1,56 @@
+# Build artifacts
+_build/
+deps/
+.mix/
+
+# Static assets (compiled)
+priv/static/
+
+# Node modules
+assets/node_modules/
+node_modules/
+
+# Development files
+.git/
+.gitignore
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+README.md
+CLAUDE.md
+
+# Test files
+test/
+cover/
+
+# Development logs
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/
+
+# Documentation
+docs/
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+
+# Mix lock backup
+mix.lock.backup

@@ -1,0 +1,88 @@
+version: '3.8'
+
+networks:
+  base_acl_ex_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      # Database
+      DB_HOSTNAME: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: base_acl_ex_dev
+      DB_PORT: 5432
+      POOL_SIZE: 10
+      
+      # Phoenix
+      PHX_HOST: localhost
+      PHX_PORT: 4000
+      SECRET_KEY_BASE: z9qPGW1WsEo0tgmK8JvFPq0BmMBWQCI3UyncPRM9Z2ozy9TZkzUNprV7Lyo+3cks
+      LIVEVIEW_SIGNING_SALT: TKq9698w
+      
+      # Guardian JWT
+      GUARDIAN_SECRET_KEY: vErY_sEcReT_kEy_fOr_dEvElOpMeNt_OnLy_pLeAsE_cHaNgE_iN_pRoDuCtIoN
+      JWT_ACCESS_TOKEN_TTL_MINUTES: 15
+      
+      # Rate Limiting
+      RATE_LIMITING_ENABLED: true
+      RATE_LIMITING_LOG_ENABLED: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - base_acl_ex_network
+    profiles:
+      - full
+      - dev
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: base_acl_ex_dev
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - base_acl_ex_network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - base_acl_ex_network
+    profiles:
+      - full
+      - dev

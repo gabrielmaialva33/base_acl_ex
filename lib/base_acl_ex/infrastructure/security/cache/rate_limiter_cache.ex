@@ -21,15 +21,15 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
 
   @impl true
   def init(opts) do
-    limit = Keyword.get(opts, :limit, @default_limit)
+    # Get configuration from application config
+    config = Application.get_env(:base_acl_ex, :rate_limiter_cache, [])
+    limit = Keyword.get(config, :limit, Keyword.get(opts, :limit, @default_limit))
+    cleanup_interval = Keyword.get(config, :cleanup_interval, @cleanup_interval)
 
     # Start the cache with appropriate policies
     cache_opts = [
       # Default expiration - entries expire after 1 hour
-      expiration: [
-        default: :timer.hours(1),
-        lazy: true
-      ],
+      expiration: :timer.hours(1),
       # Size limit - LRU eviction when limit reached
       limit: [
         size: limit,
@@ -45,9 +45,9 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
         Logger.info("Rate limiter cache started successfully")
 
         # Schedule periodic cleanup
-        schedule_cleanup()
+        schedule_cleanup(cleanup_interval)
 
-        {:ok, %{cache_name: @cache_name, limit: limit}}
+        {:ok, %{cache_name: @cache_name, limit: limit, cleanup_interval: cleanup_interval}}
 
       {:error, reason} ->
         Logger.error("Failed to start rate limiter cache: #{inspect(reason)}")
@@ -58,7 +58,7 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
   @impl true
   def handle_info(:cleanup, state) do
     perform_cleanup()
-    schedule_cleanup()
+    schedule_cleanup(state.cleanup_interval)
     {:noreply, state}
   end
 
@@ -91,8 +91,8 @@ defmodule BaseAclEx.Infrastructure.Security.Cache.RateLimiterCache do
 
   # Private functions
 
-  defp schedule_cleanup do
-    Process.send_after(self(), :cleanup, @cleanup_interval)
+  defp schedule_cleanup(interval \\ @cleanup_interval) do
+    Process.send_after(self(), :cleanup, interval)
   end
 
   defp perform_cleanup do

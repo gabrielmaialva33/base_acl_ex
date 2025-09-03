@@ -25,11 +25,23 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/base_acl_ex"
 import topbar from "../vendor/topbar"
 
+// Alpine.js for DaisyUI interactive components
+import Alpine from "alpinejs"
+window.Alpine = Alpine
+Alpine.start()
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
     longPollFallbackMs: 2500,
     params: {_csrf_token: csrfToken},
     hooks: {...colocatedHooks},
+    dom: {
+        onBeforeElUpdated(from, to) {
+            if (from._x_dataStack) {
+                window.Alpine.clone(from, to)
+            }
+        }
+    }
 })
 
 // Show progress bar on live navigation and form submits

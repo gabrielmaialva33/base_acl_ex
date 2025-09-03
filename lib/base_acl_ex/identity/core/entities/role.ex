@@ -114,8 +114,27 @@ defmodule BaseAclEx.Identity.Core.Entities.Role do
   end
 
   @doc """
+  Generic changeset function for controllers.
+  """
+  def changeset(role_or_struct \\ %__MODULE__{}, attrs) do
+    case role_or_struct do
+      %__MODULE__{id: nil} -> new(attrs)
+      %__MODULE__{} -> update(role_or_struct, attrs)
+      _ -> new(attrs)
+    end
+  end
+
+  @doc """
   Creates a system role.
   """
+  def create_system_role(attrs, slug) when is_map(attrs) and is_binary(slug) do
+    attrs
+    |> Map.put(:slug, slug)
+    |> Map.put(:is_system, true)
+    |> Map.put(:is_active, true)
+    |> new()
+  end
+
   def create_system_role(slug) when is_binary(slug) do
     case Map.get(@system_roles, slug) do
       nil ->
